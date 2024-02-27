@@ -1,0 +1,29 @@
+{
+  "name": "vite-starter",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@vitejs/plugin-vue": "^3.2.0",
+    "@vue/compat": "3.3.4",
+    "bootstrap": "^4.5.3",
+    "bootstrap-vue": "^2.23.1",
+    "dotenv": "^16.3.1",
+    "idb": "^8.0.0",
+    "pdfjs-dist": "^4.0.379",
+    "pinia": "^2.1.7",
+    "pinia-plugin-persistedstate": "^3.2.1",
+    "vite-plugin-top-level-await": "^1.4.1",
+    "vue": "3.3.4"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.5.2",
+    "vite": "^5.0.10",
+    "vite-plugin-singlefile": "^0.13.5"
+  }
+}
