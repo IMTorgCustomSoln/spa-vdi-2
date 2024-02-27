@@ -15,5 +15,4 @@ export const DbVersion = 1
 export const StoreNameDocumentRecord = `Document`
 export const StoreNamesAndKeyFields = [
     {storeName: StoreNameDocumentRecord, keyField: 'dataArrayKey'},
-    //{storeName: StoreName, keyField: 'id'},
 ]

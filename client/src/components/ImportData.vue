@@ -63,7 +63,7 @@
                             <span>
                                 <!--ORIGINAL: Processed <strong>{{ progressBar.fileProgress }} of {{ progressBar.maxProgress }} bytes</strong> -->
                                 Processed <strong>{{ getFileProgressDisplay }} of {{ getMaxProgressDisplay }} </strong>
-                                <!--PREFERRED : Processed <strong>{{ getFormattedFileSize(progressBar.fileProgress, 'numeric') }} of {{ getFormattedFileSize(progressBar.max, 'unit') }} bytes</strong>-->
+                                <!--TODO issue: PREFERRED : Processed <strong>{{ getFormattedFileSize(progressBar.fileProgress, 'numeric') }} of {{ getFormattedFileSize(progressBar.max, 'unit') }} bytes</strong>-->
                             </span>
                         </b-progress-bar>
                     </b-progress>
@@ -136,16 +136,13 @@
                         <p>
                             Select files from the server.
                         </p>
-                        <b-form-select 
-                            v-model="preview.serverFiles" 
-                            :options="preview.availableServerFiles" 
-                            multiple
+                        <b-form-select v-model="preview.serverFiles" :options="preview.availableServerFiles" multiple
                             :select-size="6">
                         </b-form-select>
                         <ul class="no-li-dot">
                             <li><label for="fileCount">Files: &nbsp</label> <output id="fileCount">{{
                                 preview.serverFiles.length
-                            }}</output></li> 
+                            }}</output></li>
                             <li><label for="fileSize">Total size: &nbsp</label> <output id="fileSize"> {{ getFilesSize
                             }}</output></li>
                         </ul>
@@ -185,8 +182,8 @@
 
 
 <script>
-//import { ExportLogsFileName } from '@/components/stores/constants.js'
-//import { DocumentIndexData, ManagedNotesData } from '@/components/support/data.js'
+import { ExportLogsFileName } from '@/stores/constants.js'
+//import { DocumentIndexData, ManagedNotesData } from '@/stores/data.js'
 import { DocumentRecord } from '@//stores/data.js'
 
 import { getFileRecord } from '@/components/support/pdf_extract.js'
@@ -198,9 +195,6 @@ import { useAppDisplay } from '@/stores/AppDisplay'
 import { useUserContent } from '@/stores/UserContent'
 
 
-const ExportLogsFileName = 'TODO'
-
-
 export default {
     name: 'ImportData',
     compatConfig: {
@@ -210,7 +204,7 @@ export default {
     emits: ['imported-records', 'imported-workspace'],
     data() {
         return {
-            uploadIcon: ["success", "secondary"],   //TODO:change to blue after docs selected
+            uploadIcon: ["success", "secondary"],   //TODO task:change to blue after docs selected
             btnText: 'Import Data',
             activeTab: 0,
             componentBtn: true,
@@ -221,7 +215,7 @@ export default {
             uploadServerBtn: true,
             disableServerBtn: false,
 
-            /*
+            /*TODO note: keep code that would enable deconstruction to independent component
             documentsIndex: DocumentIndexData,
             managedNotes: ManagedNotesData,
             */
@@ -278,8 +272,8 @@ export default {
         },
         getFilesSize() {
             const sizesOfSelectedGroups = this.preview.availableServerFiles.filter(
-                (item) => {return this.preview.serverFiles.indexOf(item.name)!= -1}
-                ).map(item => item.bytes)
+                (item) => { return this.preview.serverFiles.indexOf(item.name) != -1 }
+            ).map(item => item.bytes)
             const sum = sizesOfSelectedGroups.reduce((partialSum, a) => partialSum + a, 0)
             if (this.preview.serverFiles.length > 0) {
                 this.uploadServerBtn = false
@@ -296,10 +290,10 @@ export default {
             const resp = await fetch(endpoint, {
                 headers: { 'Content-type': 'application/json' },
             }).then(res => res.json()).then((response) => {
-                const resp = response.map((item)=>({
+                const resp = response.map((item) => ({
                     ...item,
                     text: item.name,
-                    value: item.name    
+                    value: item.name
                 }))
                 this.preview.availableServerFiles = resp
                 return resp

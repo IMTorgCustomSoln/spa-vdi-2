@@ -9,7 +9,8 @@
             <b-button @click="loadDoc">Load Selected Doc</b-button>
             <b-button @click="highlightText">Hightlight Text</b-button>
             <b-button @click="extractTextRadial">Select Text ({{ formatBoolean(this.extractText) }})</b-button>
-            <b-button @click="extractImageRadial" :disabled="true">Select Image ({{ formatBoolean(this.extractImage) }})</b-button>
+            <b-button @click="extractImageRadial" :disabled="true">Select Image ({{ formatBoolean(this.extractImage)
+            }})</b-button>
         </b-button-group>
     </div>
     <div id="pageContainer">
@@ -29,17 +30,15 @@ import { useUserContent } from '@/stores/UserContent'
 
 export default {
     name: "PdfViewer",
-    watch: { 
+    watch: {
         //TODO, note: event source is Table Snippets
         'userContentStore.selectedSnippet': {
-            handler: async function(newVal, oldVal) {
-                //console.log('Prop changed: ', newVal, ' | was: ', oldVal)
-                console.log(newVal)
-                const txtPg = parseInt(  newVal.snippet.split('<b>pg.')[1].split('|')[0]  )
+            handler: async function (newVal, oldVal) {
+                const txtPg = parseInt(newVal.snippet.split('<b>pg.')[1].split('|')[0])
                 const pg = txtPg <= 1 ? txtPg : txtPg - 1
                 const tgtText = newVal.snippet.split('<b style="background-color: yellow">')[1].split('</b>')[0]
 
-                const app = await this.getApp    //document.getElementById('pdf-js-viewer').contentWindow.PDFViewerApplication
+                const app = await this.getApp
                 this.search(tgtText)
                 app.page = pg
             },
@@ -57,25 +56,15 @@ export default {
             extractText: false,
             extractImage: false
         }
-    },/*
-    async mounted(){
-        function isEmpty(obj) {
-          for (const prop in obj) {
-            if (Object.hasOwn(obj, prop)) {
-              return false;
-            }
-          }
-          return true;
-        }
-        let app = await this.getApp
-        while( isEmpty(app)){
-            app = await this.getApp
-        }
-        await this.loadDoc()
-
-    },*/
+    },
+    async created() {
+        //TODO task: populate viewer with actual file - not `public/` test
+        // `uint8arra to base64`, ref: https://stackoverflow.com/questions/12710001/how-to-convert-uint8-array-to-base64-encoded-string
+        // `load `pathViewer` with base64, ref: https://stackoverflow.com/questions/54651395/not-able-to-render-pdf-by-passing-uint8array-in-the-viewer-html-file-parameter-w
+        this.pathFile = '/annotation-highlight.pdf'   //initialize with `public/` test file
+    },
     computed: {
-        ...mapStores(useAppDisplay, useUserContent), ///this.userContentStore
+        ...mapStores(useAppDisplay, useUserContent),
         getPath() { return this.pathViewer + this.query + this.pathFile },
         async getApp() { return await document.getElementById('pdf-js-viewer').contentWindow.PDFViewerApplication },
         getDocument() {
@@ -264,6 +253,7 @@ export default {
 
         },
         getSelectedImage() {
+            //TODO task: select image (such as graph) - is this possible?
             //ref: https://stackoverflow.com/questions/13416800/how-to-generate-an-image-from-imagedata-in-javascript
             //ref: https://stackoverflow.com/questions/923885/capture-html-canvas-as-gif-jpg-png-pdf?noredirect=1&lq=1
             const iframeWindow = document.getElementById('pdf-js-viewer').contentWindow.document

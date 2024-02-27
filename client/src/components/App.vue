@@ -2,7 +2,7 @@
     <NavbarTop @input="viewInput" />
 
     <b-container fluid class="fluid-wide">
-        <div v-if="userContentStore.documentsIndex.documents"> <!--TODO: Why is this not working??? -->
+        <div v-if="userContentStore.documentsIndex.documents"> <!--TODO issue: Why is this not working??? -->
             <div v-show="appDisplayStore.views.viewSelection == 'search'">
                 <b-row>
                     <b-col>
@@ -23,14 +23,6 @@
                     </Table>
                 </b-col>
 
-                <!--
-                <b-col cols="">
-                    <div
-                        v-if="appDisplayStore.views.viewSelection == 'read' && userContentStore.documentsIndex.documents.length > 0">
-                        <Snippets :search="searchTableResults"/>
-                    </div>
-                </b-col>-->
-
                 <b-col :cols="this.appDisplayStore.views.attrs.pdfViewer.cols">
                     <div
                         v-if="appDisplayStore.views.viewSelection == 'read' && userContentStore.documentsIndex.documents.length > 0">
@@ -47,7 +39,6 @@
 import NavbarTop from '@/components/NavbarTop.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import Table from '@/components/Table.vue'
-//import Snippets from '@/components/Snippets.vue'
 import PdfViewer from '@/components/PdfViewer.vue'
 
 import { mapStores } from 'pinia'
@@ -61,7 +52,6 @@ export default {
         NavbarTop,
         SearchBar,
         Table,
-        //Snippets,
         PdfViewer
     },
     data() {
@@ -85,13 +75,9 @@ export default {
         }
     },
     computed: {
-        ...mapStores(useAppDisplay, useUserContent), ///this.userContentStore
+        ...mapStores(useAppDisplay, useUserContent),
     },
-    methods: {/*
-        viewInput(){
-            console.log('App')
-
-        },*/
+    methods: {
         searchTable(results) {
             this.searchTableResults = { ...this.searchTableResults, query: results.query }
             this.searchTableResults = { ...this.searchTableResults, searchTerms: results.searchTerms }
@@ -106,7 +92,6 @@ export default {
 
 <style>
 .fluid-wide {
-  max-width: 2000px;
+    max-width: 2000px;
 }
-
 </style>
