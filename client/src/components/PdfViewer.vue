@@ -39,10 +39,10 @@ export default {
                 const tgtText = newVal.snippet.split('<b style="background-color: yellow">')[1].split('</b>')[0]
 
                 const app = await this.getApp
+                await this.loadDoc()
                 this.search(tgtText)
                 app.page = pg
-            },
-            deep: false
+            }
         }
     },
     data() {
@@ -53,6 +53,7 @@ export default {
             query: '?file=',
             pathFile: null,    //'../../../tests/data/10469527483063392000-cs_nlp_2301.09640.pdf',    //must be relative to `viewer.html` location
 
+            currentDocumentId: null,
             extractText: false,
             extractImage: false
         }
@@ -186,9 +187,13 @@ export default {
             //load document from typed array
             //expected workflow: click save doc, open a new document (manually) using `Open File` button, then click load doc 
             const app = await this.getApp  //document.getElementById('pdf-js-viewer').contentWindow.PDFViewerApplication
-            const dataArray = await toRaw(this.getDocument.getDataArray())
-            const tgt = { data: Object.values(dataArray.dataArray) }
-            await app.open(tgt)
+            const doc = this.getDocument
+            if(doc.id!=this.currentDocumentId){
+                const dataArray = await toRaw(doc.getDataArray())
+                const tgt = { data: Object.values(dataArray.dataArray) }
+                await app.open(tgt)
+                this.currentDocumentId = doc.id
+            }
         },
         chgToPg3() {
             const app = document.getElementById('pdf-js-viewer').contentWindow.PDFViewerApplication
