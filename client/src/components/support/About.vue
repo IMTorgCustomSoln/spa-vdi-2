@@ -4,7 +4,7 @@
          id='btnAbout' 
          v-b-modal="'about-modal'"
          variant="primary"
-         class="fixed-large"
+         class=""
          >
          About
      </b-button>
@@ -36,9 +36,9 @@
 
 <script>
 
-export default({
+export default {
     name: "About"
-})
+}
 
 </script>
 

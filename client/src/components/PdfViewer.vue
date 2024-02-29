@@ -8,8 +8,8 @@
         <b-button-group size="sm">
             <b-button @click="loadDoc">Load Selected Doc</b-button>
             <b-button @click="highlightText">Hightlight Text</b-button>
-            <b-button @click="extractTextRadial">Select Text ({{ formatBoolean(this.extractText) }})</b-button>
-            <b-button @click="extractImageRadial" :disabled="true">Select Image ({{ formatBoolean(this.extractImage)
+            <b-button @click="extractTextRadio">Select Text ({{ formatBoolean(this.extractText) }})</b-button>
+            <b-button @click="extractImageRadio" :disabled="true">Select Image ({{ formatBoolean(this.extractImage)
             }})</b-button>
         </b-button-group>
     </div>
@@ -82,17 +82,28 @@ export default {
             await this.loadDoc()
             return true
         },
-        extractTextRadial() {
+        extractTextRadio() {
             const app = document.getElementById('pdf-js-viewer').contentWindow.document
             this.extractText = !this.extractText
             if (this.extractText) {
-                app.addEventListener('selectionchange', this.logText)
+                app.addEventListener('selectionchange', this.logTextToNotesManager)
             } else {
-                app.removeEventListener('selectionchange', this.logText)
+                app.removeEventListener('selectionchange', this.logTextToNotesManager)
+                this.userContentStore.addNewNoteToManager()
             }
         },
-        logText(e) {
-            console.log(this.getSelectedText(e))
+        logTextToNotesManager(e) {
+            const txt = this.getSelectedText(e)
+            console.log(txt)
+            const noteItem = {
+                id: ''.toString(),
+                list: 'stagingNotes',
+                type: 'auto',
+                innerHTML: txt,
+                innerText: txt
+            }
+            //TODO task: add document information
+            this.userContentStore.newNote = noteItem
         },
         getSelectedText(e) {
             const iframeWindow = document.getElementById('pdf-js-viewer').contentWindow.document
@@ -104,7 +115,7 @@ export default {
             }
             return '';
         },
-        extractImageRadial() {
+        extractImageRadio() {
             // TODO: this fails !!!
             //google: pdfjs pdfviewer area selector
             //ref: https://stackoverflow.com/questions/17703906/use-a-canvas-to-select-a-portion-of-a-pdf-document?rq=3

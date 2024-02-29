@@ -18,7 +18,7 @@
                     <Table :records="userContentStore.documentsIndex.documents" :search="searchTableResults"
                         :tableFields="this.appDisplayStore.views.attrs.table.fields"
                         :expansionBtn="this.appDisplayStore.views.attrs.table.toggleExpansionBtn"
-                        v-on:send-note="updateNotes">
+                        >
                         {{ createTable }}
                     </Table>
                 </b-col>
@@ -40,6 +40,7 @@ import NavbarTop from '@/components/NavbarTop.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import Table from '@/components/Table.vue'
 import PdfViewer from '@/components/PdfViewer.vue'
+
 
 import { mapStores } from 'pinia'
 import { useAppDisplay } from '@/stores/AppDisplay'

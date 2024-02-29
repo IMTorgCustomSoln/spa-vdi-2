@@ -156,7 +156,7 @@ export default {
             }
         }
     },
-    emits: ['send-note'],
+    //emits: ['send-note'],
     components: {
         Guide
     },
@@ -427,7 +427,7 @@ ready to be organized with the note Topics.`
             //this.searchResults = {...this.searchResults, mouseOverSnippet: mouseOverSnippet}
             this.mouseOverSnippet = mouseOverSnippet
             this.userContentStore.selectedSnippet = mouseOverSnippet
-        },
+        },/*
         postNote(event) {
             const element = event.target.parentElement.children[0]
             //TODO: fix the code below which should use `new NoteRecord()`, but from within Draggable - not here
@@ -442,11 +442,9 @@ ready to be organized with the note Topics.`
 
             //TODO:note
             this.$emit('send-note', noteItem);
-        },
+        },*/
     }
 }
-
-
 </script>
 
 

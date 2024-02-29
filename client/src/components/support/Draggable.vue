@@ -29,22 +29,30 @@ ref:[Adding Drag and Drop to Your Vue3 Project](www.youtube.com/watch?v=-kZLD40d
 
 
 <script>
-import {ManagedNotesData} from './data.js'
+//import {ManagedNotesData} from './data.js'
+import { mapStores } from 'pinia'
+import { useAppDisplay } from '@/stores/AppDisplay'
+import { useUserContent } from '@/stores/UserContent'
 
-export default ({
+
+export default {
   name: "Draggable",
   props: {listName: String},
   data(){
     return{
-      items: ManagedNotesData.value.notes
+      //items: ManagedNotesData.value.notes
     }
+   },
+   computed:{
+    ...mapStores(useAppDisplay, useUserContent),
+
    },
    methods: {
     getList(list){
-      return this.items.filter(item=>item.list == list)
+      return this.userContentStore.managedNotes.notes.filter(item=>item.list == list)
     },
     removeNote(item){
-      this.items.splice(this.items.indexOf(item), 1)
+      this.userContentStore.managedNotes.notes.splice(this.userContentStore.managedNotes.notes.indexOf(item), 1)
     },
     startDrag(event, item){
       //console.log(item)
@@ -62,11 +70,11 @@ export default ({
     onDrop(event, list){
       event.target.style.background = ""
       const itemId = event.dataTransfer.getData('itemID')
-      const item = this.items.find(item => item.id==itemId)    //find selected item
+      const item = this.userContentStore.managedNotes.notes.find(item => item.id==itemId)    //find selected item
       item.list = list                                    //change items list
     }
    }
-  })
+  }
 </script>
 
 

@@ -205,7 +205,7 @@ export default {
     data() {
         return {
             uploadIcon: ["success", "secondary"],   //TODO task:change to blue after docs selected
-            btnText: 'Import Data',
+            btnText: 'Import',
             activeTab: 0,
             componentBtn: true,
             uploadBtn: true,

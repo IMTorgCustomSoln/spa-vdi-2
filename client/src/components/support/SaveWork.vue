@@ -4,7 +4,7 @@
         id='btnSaveContinue' 
         v-b-modal="'save-continue-modal'"
         variant="primary"
-        class="fixed-large"
+        class=""
         >
         {{ btnText }}
     </b-button>
@@ -58,14 +58,18 @@
 <script>
 import { isProxy, toRaw } from 'vue'
 
-import { DocumentIndexData, ManagedNotesData } from './data'
-import { ExportAppStateFileName } from './constants.js'
+//import { DocumentIndexData, ManagedNotesData } from './data'
+import { ExportAppStateFileName } from '@/stores/constants.js'
+import { mapStores } from 'pinia'
+import { useAppDisplay } from '@/stores/AppDisplay'
+import { useUserContent } from '@/stores/UserContent'
 
-export default({
+
+export default {
     name: 'SaveWork',
     data(){
         return {
-            btnText: 'Save Workspace',
+            btnText: 'Save',
             description: true,
             config: {
                 fileHandle: '',
@@ -76,9 +80,13 @@ export default({
             resultDisplay: {
                 error: ''
             },
-            documentsIndex: DocumentIndexData,
-            managedNotes: ManagedNotesData,
+            //documentsIndex: DocumentIndexData,
+            //managedNotes: ManagedNotesData,
         }
+    },
+    computed:{
+        ...mapStores(useAppDisplay, useUserContent),
+
     },
     methods: {
 
@@ -120,7 +128,7 @@ export default({
 
 
     }
-})
+}
 </script>
 
 
@@ -129,7 +137,7 @@ export default({
     width: 150px !important;
 }
 #btnSaveContinue {
-  margin: 5px;
+  /*margin: 5px;*/
 }
 .no-li-dot{
     list-style-type: none;

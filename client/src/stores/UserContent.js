@@ -20,7 +20,11 @@ export const useUserContent = defineStore('userContent', {
                 strIndex: ''
               }
             },
-            managedNotes: [],
+            newNote: null,
+            managedNotes: {
+              topics: [],
+              notes: []
+            },
 
             //search
             showTablePanel: false,
@@ -65,6 +69,9 @@ export const useUserContent = defineStore('userContent', {
             this.showTablePanel = true
             this.processedFiles.length = 0
           },
+          addNewNoteToManager(){
+            this.managedNotes.notes.push(this.newNote)
+          }
 
     }
 })

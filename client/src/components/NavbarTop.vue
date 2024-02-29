@@ -6,15 +6,28 @@
 
       <!--TOOD issue: why the warning-->
       <b-navbar-nav class="ml-auto middle">
-        <ImportData />
+        <!--<ImportData />-->
+
+        <!--<b-button-group>-->
+          <b-nav-form>
+            <ImportData />
+            <Sidebar :note="note" />
+            <SaveWork />
+            
+          </b-nav-form>
+        <!--</b-button-group>-->
       </b-navbar-nav>
 
       <!-- Right aligned nav items-->
       <b-navbar-nav class="ml-auto" right>
+        <b-nav-form>
+        <!--TODO task: fix profile-->
         <b-button sz="sm" class="my-2 my-sm-0" @click="modalAccount">
           {{ this.userContentStore.name }}
         </b-button>
-        <b-nav-item href="#">About</b-nav-item>
+        <!--<b-nav-item href="#">About</b-nav-item>-->
+        <About />
+        </b-nav-form>
       </b-navbar-nav>
 
     </b-navbar>
@@ -32,6 +45,9 @@
 
 <script>
 import ImportData from '@/components/ImportData.vue'
+import Sidebar from '@/components/SideBar.vue'
+import SaveWork from '@/components/support/SaveWork.vue'
+import About from '@/components/support/About.vue'
 
 import { mapStores } from 'pinia'
 import { useAppDisplay } from '@/stores/AppDisplay'
@@ -41,7 +57,11 @@ import { useUserContent } from '@/stores/UserContent'
 export default {
   name: 'NavbarTop',
   components: {
-    ImportData
+    ImportData,
+    Sidebar,
+    SaveWork,
+    About
+
   },
   data() {
     return {

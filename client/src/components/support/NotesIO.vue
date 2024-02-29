@@ -53,7 +53,14 @@
 
 <script>
 import { isProxy, toRaw } from 'vue'
-import {ExportFileName, ExportTextName, ManagedNotesData} from './constants.js'
+import {ExportFileName, ExportTextName} from '@/stores/constants.js'
+//import {ExportFileName, ExportTextName, ManagedNotesData} from '@/stores/constants.js'
+
+import { mapStores } from 'pinia'
+import { useAppDisplay } from '@/stores/AppDisplay'
+import { useUserContent } from '@/stores/UserContent'
+
+
 
 //placeholder for when LLM is used
 class LLM {
@@ -72,14 +79,15 @@ export default{
     name: 'NotesIO',
     data(){
         return {
-            topics: ManagedNotesData.value.topics,
-            notes: ManagedNotesData.value.notes,
+            //topics: ManagedNotesData.value.topics,
+            //notes: ManagedNotesData.value.notes,
             file: '',
 
             llm: LLM,
         }
     },
     computed:{
+        ...mapStores(useAppDisplay, useUserContent),
         getFormattedLlmConfigStatus(){
             const check1 = this.llm.init_label == ''
             const check2 = this.llm.init_label.includes('/')
@@ -117,7 +125,7 @@ export default{
             const output = []
             const initial = `# Notes`
             output.push(initial)
-            let allTopics = [...this.topics]
+            let allTopics = [...this.userContentStore.managedNotes.topics]
             const staging = {title:'Staging Notes', 
                             dropZoneName:'stagingNotes'
                         }
@@ -125,7 +133,7 @@ export default{
             for (let topic of allTopics){
                 let hdr = `\n\n\n## ${topic.title}\n\n`
                 output.push(hdr)
-                for (let note of this.notes){
+                for (let note of this.userContentStore.managedNotes.notes){
                     if (note.list == topic.dropZoneName){
                         if (note.type == "hand"){
                             let ul = `* ${note.innerText}\n`
@@ -159,7 +167,7 @@ export default{
             const output = []
             const initial = `# Notes`
             output.push(initial)
-            let allTopics = [...this.topics]
+            let allTopics = [...this.userContentStore.managedNotes.topics]
             const staging = {title:'Staging Notes', 
                             dropZoneName:'stagingNotes'
                         }
@@ -168,7 +176,7 @@ export default{
                 let hdr = `\n\n\n## ${topic.title}\n\n`
                 output.push(hdr)
 
-                for (let note of this.notes){
+                for (let note of this.userContentStore.managedNotes.notes){
                     if (note.list == topic.dropZoneName){
                         if (note.type == "hand"){
                             let ul = `* ${note.innerText}\n`
@@ -207,8 +215,8 @@ export default{
         exportToJson(e){
             const create = e.target
             const object = {
-                topics: this.topics,
-                notes: this.notes
+                topics: this.userContentStore.managedNotes.topics,
+                notes: this.userContentStore.managedNotes.notes
             }
             const jsonObj = JSON.stringify( toRaw(object) )
             const a = document.createElement('a')
@@ -232,17 +240,17 @@ export default{
         async appendNotes(){
             const file = uploadInput.files[0]
             const object = await parseJsonFile(file)
-            this.topics.push(...object.topics)
-            this.notes.push(...object.notes)
+            this.userContentStore.managedNotes.topics.push(...object.topics)
+            this.userContentStore.managedNotes.notes.push(...object.notes)
             this.$bvModal.hide("import-notes-modal")
         },
         async replaceNotes(){
             const file = uploadInput.files[0]
             const object = await parseJsonFile(file)
-            this.topics.length = 0
-            this.notes.length = 0
-            Object.assign(this.topics, object.topics)
-            Object.assign(this.notes, object.notes)
+            this.userContentStore.managedNotes.topics.length = 0
+            this.userContentStore.managedNotes.notes.length = 0
+            Object.assign(this.userContentStore.managedNotes.topics, object.topics)
+            Object.assign(this.userContentStore.managedNotes.notes, object.notes)
             this.$bvModal.hide("import-notes-modal")
         }
     }
