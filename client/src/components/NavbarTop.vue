@@ -21,8 +21,9 @@
       <!-- Right aligned nav items-->
       <b-navbar-nav class="ml-auto" right>
         <b-nav-form>
-        <!--TODO task: fix profile-->
-        <b-button sz="sm" class="my-2 my-sm-0" @click="modalAccount">
+        <!--TODO task: fix profile
+        <b-button sz="sm" class="my-2 my-sm-0" @click="modalAccount">-->
+          <b-button @click="modalAccount">
           {{ this.userContentStore.name }}
         </b-button>
         <!--<b-nav-item href="#">About</b-nav-item>-->

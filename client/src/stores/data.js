@@ -27,6 +27,7 @@ export class NoteRecord{
     this.innerText = innerText
   }
 }
+/*
 const records = []
 const topics = []
 for (let idx=1; idx<=2; idx++){     //change for testing
@@ -42,7 +43,7 @@ for (let idx=1; idx<=2; idx++){     //change for testing
 export const ManagedNotesData = ref({
   topics: topics,
   notes: records
-})
+})*/
 
 
 
@@ -121,7 +122,7 @@ export class DocumentRecord{
     }
 }
 
-
+/*
 export const DocumentIndexData = ref({
   documents: [],
   indices: {        //TODO: indices are saved / loaded, but indices are currrently created from document records
@@ -129,3 +130,4 @@ export const DocumentIndexData = ref({
     strIndex: ''
   }
 })
+*/

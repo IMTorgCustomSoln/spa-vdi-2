@@ -84,6 +84,7 @@
                         <div>
                             <b>Search results in {{ getSearchSnippets.length }} hits: </b>
                             <Guide v-bind="guides.snippet" />
+                            <div v-if="getSearchSnippets.length < 1">Select a document from the table.</div>
                         </div>
                         <div id="search-results" v-for="(snippet, index) in getSearchSnippets">
                             <div class="snippet" @click="selectSnippetPage(index, snippet)">

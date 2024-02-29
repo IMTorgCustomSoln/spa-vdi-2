@@ -53,6 +53,7 @@ export default {
             query: '?file=',
             pathFile: null,    //'../../../tests/data/10469527483063392000-cs_nlp_2301.09640.pdf',    //must be relative to `viewer.html` location
 
+            newNote: null,
             currentDocumentId: null,
             extractText: false,
             extractImage: false
@@ -82,36 +83,41 @@ export default {
             await this.loadDoc()
             return true
         },
-        extractTextRadio() {
-            const app = document.getElementById('pdf-js-viewer').contentWindow.document
+        async extractTextRadio() {
+            const app = await this.getApp  
+            const doc = document.getElementById('pdf-js-viewer').contentWindow.document
             this.extractText = !this.extractText
             if (this.extractText) {
-                app.addEventListener('selectionchange', this.logTextToNotesManager)
+                doc.addEventListener('selectionchange', this.logTextToNotesManager)
             } else {
-                app.removeEventListener('selectionchange', this.logTextToNotesManager)
+                doc.removeEventListener('selectionchange', this.logTextToNotesManager)
+                const reference = `<div style="font-weight: bold">${this.getDocument.filepath}, pg.${app.page} |</div> ${this.newNote}`
+                const noteItem = {
+                    id: Date.now(),
+                    list: 'stagingNotes',
+                    type: 'auto',
+                    innerHTML: reference,
+                    innerText: reference
+                }
+                this.userContentStore.newNote = noteItem
                 this.userContentStore.addNewNoteToManager()
+                this.highlightText()
             }
+            return true
         },
         logTextToNotesManager(e) {
             const txt = this.getSelectedText(e)
-            console.log(txt)
-            const noteItem = {
-                id: ''.toString(),
-                list: 'stagingNotes',
-                type: 'auto',
-                innerHTML: txt,
-                innerText: txt
-            }
-            //TODO task: add document information
-            this.userContentStore.newNote = noteItem
+            //console.log(txt)
+            this.newNote = txt
         },
         getSelectedText(e) {
             const iframeWindow = document.getElementById('pdf-js-viewer').contentWindow.document
             if (iframeWindow) {
-                return iframeWindow.getSelection().toString();
+                return iframeWindow.getSelection().toString()
             }
             else if (document.selection) {
-                return document.selection.createRange().text;
+                //e.target.getSelection().toString()
+                return document.selection.createRange().text
             }
             return '';
         },
@@ -199,7 +205,7 @@ export default {
             //expected workflow: click save doc, open a new document (manually) using `Open File` button, then click load doc 
             const app = await this.getApp  //document.getElementById('pdf-js-viewer').contentWindow.PDFViewerApplication
             const doc = this.getDocument
-            if(doc.id!=this.currentDocumentId){
+            if (doc.id != this.currentDocumentId) {
                 const dataArray = await toRaw(doc.getDataArray())
                 const tgt = { data: Object.values(dataArray.dataArray) }
                 await app.open(tgt)
@@ -218,7 +224,7 @@ export default {
         highlightText() {
             const selected = this.getSelectionCoords()
             this.showHighlight(selected)
-            console.log(selected)
+            //console.log(selected)
 
         },
         getSelectionCoords() {

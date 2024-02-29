@@ -82,6 +82,7 @@ const stagingNotesList = 'stagingNotes'
 
 export default {
     name: 'Sidebar',
+    /*
     props: ['note'],
     watch: {
         note: {
@@ -93,7 +94,7 @@ export default {
             },
             deep: true
         }
-    },
+    },*/
     components: {
         Draggable,
         NotesIO: NotesIO,
@@ -130,6 +131,9 @@ export default {
                 }
             }
         }
+    },
+    mounted(){
+        this.userContentStore.setPlaceholders()
     },
     computed:{
         ...mapStores(useAppDisplay, useUserContent),

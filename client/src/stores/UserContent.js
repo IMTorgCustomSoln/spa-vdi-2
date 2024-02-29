@@ -1,5 +1,9 @@
 import { defineStore } from "pinia"
 
+import { TopicRecord, NoteRecord } from "./data"
+import { camelize } from '@/components/support/utils.js'
+
+
 export const useUserContent = defineStore('userContent', {
     state:() => {
         return{
@@ -48,6 +52,18 @@ export const useUserContent = defineStore('userContent', {
     actions:{
         getName(){
             return this.name
+        },
+        setPlaceholders(){
+          for(let idx=1; idx<=2; idx++){     //change for testing
+            let text = `<Placeholder for item ${idx}>`
+            let note = new NoteRecord(idx.toString(), 'stagingNotes', 'hand', '', text)
+            this.managedNotes.notes.push(note)
+          
+            let title = `<Topic-${idx} placeholder>`
+            let edited_title = title.trim()
+            let topic = new TopicRecord(idx.toString(), edited_title, camelize(edited_title) + Date.now())
+            this.managedNotes.topics.push(topic)
+          }
         },
         addRecordsFromImport(){
             //check file for uniqueness in reference_number, then append

@@ -14,6 +14,9 @@
             </div>
 
             <b-row>
+                <!--TODO, task: add splitpanes
+                    ref: https://antoniandre.github.io/splitpanes/
+                -->
                 <b-col :cols="this.appDisplayStore.views.attrs.table.cols">
                     <Table :records="userContentStore.documentsIndex.documents" :search="searchTableResults"
                         :tableFields="this.appDisplayStore.views.attrs.table.fields"
