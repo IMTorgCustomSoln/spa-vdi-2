@@ -42,6 +42,7 @@ __Staging__
 
 * important
   - fix PdfViewer highlight, text selection so that rectangle scales with change in viewer dimensions, similar to Search
+    + `window.PDFViewerApplication.pdfViewer._pages[10].textLayer`
   - find way to highlight results of backend models
 
 * refinements
