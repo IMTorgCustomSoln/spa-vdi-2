@@ -3,7 +3,7 @@
         <b-button size="sm" variant="primary" v-on:click="expandAll" class="fixed-medium">Expand All</b-button>
         <b-button size="sm" variant="primary" v-on:click="collapseAll" class="fixed-medium">Collapse All</b-button>
     </div>
-    <div> <!-- v-if="initializeTable">  -->
+    <div  v-if="this.userContentStore.documentsIndex.documents">
         <!--refs
             * showDetails: https://stackoverflow.com/questions/52327549/bootstrap-vue-table-show-details-when-row-clicked
             * reactivity: https://github.com/bootstrap-vue/bootstrap-vue/issues/2960
@@ -199,6 +199,10 @@ ready to be organized with the note Topics.`
                 }
             }
         }
+    },
+    mounted(){
+        this.createTable()
+
     },
     computed: {
         ...mapStores(useUserContent, useAppDisplay),
@@ -490,7 +494,7 @@ ready to be organized with the note Topics.`
     overflow-y: auto;
     float: left;
     position: relative;
-    margin-left: -5px;
+    margin-left: 5px;
 }
 
 .left_contentlist {

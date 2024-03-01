@@ -40,25 +40,24 @@ python create_estimation_model.py --input_dir = "./tests/logs/"
 
 __Staging__
 
-* ~~install pinia and pinia-persisted-state~~
-  - ~~may need to create a new branch and blow-away current client~~
-  - ~~restart with vue prompts~~
-  - ~~[ref](https://stackoverflow.com/questions/70147707/importing-bootstrapvue-in-vue-3)~~
-* migrate `client/` to `frontend/frontend/`
-  - ~~change table column from id to Path~~
-  - ~~fix for multiple documents in PdfViewer~~
-  - fix Table field: Score
-  - add snippets
-  - send extract to NotesManager
+* important
+  - fix PdfViewer highlight, text selection so that rectangle scales with change in viewer dimensions, similar to Search
+  - find way to highlight results of backend models
+
+* refinements
+  - ~~display Table on ingest of documents~~
+  - fix Table field `Score`, which does not update
+    + `Table.vue, ln.247` - `this.items[0].sort_key` is updated, but does not change within the component
+  - remove need for placeholder: `/annotation-highlight.pdf`
+
 * pwa design for long-term evolution
   - move current data stores to pinia state management: `documentsIndex`, `managedNotes`
-  - ~~serve html from integrated engine (split logic between client / server)~~
   - create `documentsIndex` within python
   - load data from server-streamed gzip, [ref](https://stackoverflow.com/questions/957577/serving-gzipped-content-from-django)
   - autosave to file
-  - apply mozilla Viewer for display
-  - change layout to index and full-page pdf
-
+  - send notes to word document
+    + enable format ingest to standardize output
+    + [ref](https://www.npmjs.com/package/docx)
 
 __Planned__
 

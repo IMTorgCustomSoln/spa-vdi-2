@@ -19,14 +19,14 @@ export const useAppDisplay = defineStore('appDisplay', {
                 ],
                 attrs: { //initialized
                     table: {
-                        size: 100,   //TODO, change to `size`
+                        size: 100,
                         fields: searchTableFields,
                         toggleExpansionBtn: true,
                         colsTable: 12,
                         colsSnippets: 0
                     },
                     pdfViewer: {
-                        size: 0    //TODO, change to `size`
+                        size: 0
                     }
                 }
             }
