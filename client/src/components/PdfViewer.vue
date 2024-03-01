@@ -84,7 +84,7 @@ export default {
             return true
         },
         async extractTextRadio() {
-            const app = await this.getApp  
+            const app = await this.getApp
             const doc = document.getElementById('pdf-js-viewer').contentWindow.document
             this.extractText = !this.extractText
             if (this.extractText) {

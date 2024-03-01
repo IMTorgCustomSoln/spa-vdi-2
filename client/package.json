@@ -18,6 +18,7 @@
     "pdfjs-dist": "^4.0.379",
     "pinia": "^2.1.7",
     "pinia-plugin-persistedstate": "^3.2.1",
+    "splitpanes": "^2.4.1",
     "vite-plugin-top-level-await": "^1.4.1",
     "vue": "3.3.4"
   },

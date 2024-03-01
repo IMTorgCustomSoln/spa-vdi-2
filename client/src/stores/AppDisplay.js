@@ -19,15 +19,14 @@ export const useAppDisplay = defineStore('appDisplay', {
                 ],
                 attrs: { //initialized
                     table: {
-                        cols: 12,
+                        size: 100,   //TODO, change to `size`
                         fields: searchTableFields,
                         toggleExpansionBtn: true,
                         colsTable: 12,
                         colsSnippets: 0
                     },
                     pdfViewer: {
-                        cols: 8
-
+                        size: 0    //TODO, change to `size`
                     }
                 }
             }
@@ -39,22 +38,22 @@ export const useAppDisplay = defineStore('appDisplay', {
     actions: {
         viewSelection(checked) {
             if (checked == 'search') {
-                this.views.attrs.table.cols = 12
+                this.views.attrs.table.size = 100
                 this.views.attrs.table.fields = searchTableFields
                 this.views.attrs.table.toggleExpansionBtn = true
-                this.views.attrs.pdfViewer.cols = 0
+                this.views.attrs.pdfViewer.size = 0
 
                 this.views.attrs.table.colsTable = 12
                 this.views.attrs.table.colsSnippets = 0
             }
             else if (checked == 'read') {
-                this.views.attrs.table.cols = 6
+                this.views.attrs.table.size = 50
                 this.views.attrs.table.fields = readTableFields
                 this.views.attrs.table.toggleExpansionBtn = false
-                this.views.attrs.pdfViewer.cols = 6
+                this.views.attrs.pdfViewer.size = 50
 
-                this.views.attrs.table.colsTable = 4
-                this.views.attrs.table.colsSnippets = 8
+                this.views.attrs.table.colsTable = 6
+                this.views.attrs.table.colsSnippets = 6
             }
         }
 

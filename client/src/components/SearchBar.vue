@@ -39,7 +39,7 @@ export default {
                     this.createIndex()
                 }
             },
-            deep: false
+            deep: true
         }
     },
     emits: ['search-table-results'],
@@ -86,6 +86,9 @@ The results are ordered by the 'Score' column, which is a weighted formula of th
                 }
             }
         }
+    },
+    mounted(){
+        this.createIndex()
     },
     computed: {
         ...mapStores(useUserContent),

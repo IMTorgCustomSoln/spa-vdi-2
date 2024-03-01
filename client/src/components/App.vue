@@ -2,7 +2,7 @@
     <NavbarTop @input="viewInput" />
 
     <b-container fluid class="fluid-wide">
-        <div v-if="userContentStore.documentsIndex.documents"> <!--TODO issue: Why is this not working??? -->
+        <div v-if="userContentStore.documentsIndex.documents.length > 0">
             <div v-show="appDisplayStore.views.viewSelection == 'search'">
                 <b-row>
                     <b-col>
@@ -12,33 +12,36 @@
                     </b-col>
                 </b-row>
             </div>
-
-            <b-row>
-                <!--TODO, task: add splitpanes
-                    ref: https://antoniandre.github.io/splitpanes/
-                -->
-                <b-col :cols="this.appDisplayStore.views.attrs.table.cols">
-                    <Table :records="userContentStore.documentsIndex.documents" :search="searchTableResults"
-                        :tableFields="this.appDisplayStore.views.attrs.table.fields"
-                        :expansionBtn="this.appDisplayStore.views.attrs.table.toggleExpansionBtn"
-                        >
-                        {{ createTable }}
-                    </Table>
-                </b-col>
-
-                <b-col :cols="this.appDisplayStore.views.attrs.pdfViewer.cols">
-                    <div
-                        v-if="appDisplayStore.views.viewSelection == 'read' && userContentStore.documentsIndex.documents.length > 0">
-                        <PdfViewer />
-                    </div>
-                </b-col>
-            </b-row>
+            <div>
+                <b-row>
+                    <b-col cols="12">
+                        <splitpanes class="default-theme" vertical style="height: 100%; width=100%;">
+                            <pane :size="this.appDisplayStore.views.attrs.table.size">
+                                <Table :records="userContentStore.documentsIndex.documents" :search="searchTableResults"
+                                    :tableFields="this.appDisplayStore.views.attrs.table.fields"
+                                    :expansionBtn="this.appDisplayStore.views.attrs.table.toggleExpansionBtn">
+                                    {{ createTable }}
+                                </Table>
+                            </pane>
+                            <pane :size="this.appDisplayStore.views.attrs.pdfViewer.size">
+                                <div
+                                    v-if="appDisplayStore.views.viewSelection == 'read' && userContentStore.documentsIndex.documents.length > 0">
+                                    <PdfViewer />
+                                </div>
+                            </pane>
+                        </splitpanes>
+                    </b-col>
+                </b-row>
+            </div>
         </div>
     </b-container>
 </template>
 
 
 <script>
+import { Splitpanes, Pane } from 'splitpanes'
+import 'splitpanes/dist/splitpanes.css'
+
 import NavbarTop from '@/components/NavbarTop.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import Table from '@/components/Table.vue'
@@ -56,7 +59,9 @@ export default {
         NavbarTop,
         SearchBar,
         Table,
-        PdfViewer
+        PdfViewer,
+
+        Splitpanes, Pane
     },
     data() {
         return {
@@ -96,6 +101,6 @@ export default {
 
 <style>
 .fluid-wide {
-    max-width: 2000px;
+    max-width: 2200px;
 }
 </style>
