@@ -40,6 +40,11 @@ python create_estimation_model.py --input_dir = "./tests/logs/"
 
 __Staging__
 
+* search 
+  - ~~dropdown for search type~~
+  - searchExact() does not work
+  - fix Guide which no longer uses backticks: `checkBackticks`
+
 * important
   - fix PdfViewer highlight, text selection so that rectangle scales with change in viewer dimensions, similar to Search
     + `window.PDFViewerApplication.pdfViewer._pages[10].textLayer`

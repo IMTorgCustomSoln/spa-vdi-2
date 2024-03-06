@@ -2,16 +2,30 @@
     <!-- Search -->
     <b-row id="table-panel">
         <b-col>
-            <span>
-                <h5 style="display:inline">Search: </h5>
-                <Guide v-bind="guides.search" />
-                <input type="text" class="form-control" id="search-field" v-model="query" @input="searchQuery"
+            <h5 style="display:inline">Search: </h5>
+            <Guide v-bind="guides.search" />
+            <b-input-group>
+                <template #prepend>
+                    <b-dropdown 
+                        :text="queryOptions[selectedIdx].value" 
+                        v-model="selectedIdx" 
+                        variant="outline-primary"
+                        >
+                        <b-dropdown-item v-for="option in queryOptions" :key="option.id" @click="changeItem(option)">
+                            {{ option.value }}
+                        </b-dropdown-item>
+                    </b-dropdown>
+                </template>
+
+                <b-form-input type="text" class="form-control" id="search-field" v-model="query" @input="searchQuery"
                     placeholder="type search text here..." />
+            </b-input-group>
+            <div id="results-summary">
                 <div v-if="searchDisplayResults.searchTerms">
                     <div v-if="!searchDisplayResults.errorMsg" style="white-space: pre-line">{{ searchResultsCount }}</div>
                     <div v-else class="errorMsg"> {{ searchDisplayResults.errorMsg }}</div>
                 </div>
-            </span>
+            </div>
         </b-col>
     </b-row>
 </template>    
@@ -49,7 +63,13 @@ export default {
     data() {
         //this.indices = DocumentIndexData.value.indices
         return {
+            selectedIdx: 0,
+            queryOptions: [
+                {id:0, value:'Fuzzy'},
+                {id:1, value:'Exact'}
+            ],
             searchTableResults: {
+                type: null,
                 query: '',
                 terms: [],
                 resultIds: [],
@@ -87,7 +107,7 @@ The results are ordered by the 'Score' column, which is a weighted formula of th
             }
         }
     },
-    mounted(){
+    mounted() {
         this.createIndex()
     },
     computed: {
@@ -97,6 +117,11 @@ The results are ordered by the 'Score' column, which is a weighted formula of th
         },
     },
     methods: {
+        changeItem(option){
+            this.selectedIdx = option.id
+            console.log(option.id)
+            this.searchQuery()
+        },
         createIndex() {
             //create lunr index
             const records = this.$props.records
@@ -114,28 +139,55 @@ The results are ordered by the 'Score' column, which is a weighted formula of th
         continueWorkspaceIndex() {
             //TODO: use previous index if saved Workspace file is loaded
         },
-        searchQuery() {
-            /* Provide tableFilter of selected rows' id based on `this.query` input
+        searchFuzzy(){
+            //query lunrjs index
+            const queryVal = this.query
+                var searchTerms = ''
+                var results = ''
+                try {
+                    searchTerms = this.userContentStore.documentsIndex.indices.lunrIndex.pipeline.run(lunr.tokenizer(queryVal))
+                    this.searchDisplayResults = { ...this.searchDisplayResults, searchTerms: searchTerms }
+                    results = this.userContentStore.documentsIndex.indices.lunrIndex.search(queryVal).map(resultFile => { return resultFile })
+                } catch (error) {
+                    this.searchDisplayResults = { ...this.searchDisplayResults, errorMsg: error }
+                    this.resetAllItems()
+                    return false
+                }
+                const resultIds = results.map(resultFile => resultFile.ref)
+                console.log(`resultdIds: ${resultIds}`)
+                this.searchTableResults = { ...this.searchTableResults, resultIds: resultIds }
+                this.searchDisplayResults = { ...this.searchDisplayResults, totalDocuments: resultIds.length }
 
-            :query str - from text input, should match lunrjs patterns
-            :filter [] - selected files' ids
-            */
-            console.log(`query: ${this.query}`)
-            this.searchTableResults = { ...this.searchTableResults, query: this.query }
-            this.searchDisplayResults = { ...this.searchDisplayResults, errorMsg: '' }
-            const backticksLength = (this.query.match(/`/g) || []).length
-            const checkBackticks = backticksLength > 0 && backticksLength % 2 == 0
+                //get hit counts for individual doc and total docs
+                const resultGroups = []
+                for (let resultFile of results) {
+                    let new_keys = Object.keys(resultFile.matchData.metadata)
+                    let counts = []
+                    let positions = []
+                    let rec = {}
+                    rec['ref'] = resultFile.ref
+                    rec['score'] = resultFile.score.toFixed(3)
+                    for (let key of new_keys) {
+                        counts.push(resultFile.matchData.metadata[key].clean_body.position.length)
+                        positions.push(...resultFile.matchData.metadata[key].clean_body.position)
+                    }
+                    rec['count'] = counts.reduce((pv, cv) => { return pv + cv }, 0)
+                    rec['positions'] = positions.sort(compareByFirstItem)
+                    resultGroups.push(rec)
+                }
+                let totalCount = 0
+                totalCount = resultGroups.reduce(function (pv, cv) { return pv + cv.count }, 0)
+                this.searchDisplayResults = { ...this.searchDisplayResults, count: totalCount }
+                this.searchTableResults = { ...this.searchTableResults, resultGroups: resultGroups }
+                console.log(`resultGroups (array of all hits within a doc): `); console.log(resultGroups)
 
-            // no query input
-            if (this.query.length === 0) {
-                this.resetAllItems()
                 this.$emit('search-table-results', this.searchTableResults)
-                return false
 
-                // exact phrase search using backticks
-            } else if (checkBackticks) {
-                //collect phrases
-                const phrases = []
+        },
+        searchExact(){
+            //TODO, fix: not working!
+            //collect phrases
+            const phrases = []
                 let substr = ''
                 let select = false
                 for (let char of this.query) {
@@ -191,51 +243,36 @@ The results are ordered by the 'Score' column, which is a weighted formula of th
 
                 this.$emit('search-table-results', this.searchTableResults)
 
-                // lunrJs query
-            } else if (this.userContentStore.documentsIndex.indices.lunrIndex) {
+        },
+        searchQuery() {
+            /* Provide tableFilter of selected rows' id based on `this.query` input
 
-                //query lunrjs index
-                const queryVal = this.query
-                var searchTerms = ''
-                var results = ''
-                try {
-                    searchTerms = this.userContentStore.documentsIndex.indices.lunrIndex.pipeline.run(lunr.tokenizer(queryVal))
-                    this.searchDisplayResults = { ...this.searchDisplayResults, searchTerms: searchTerms }
-                    results = this.userContentStore.documentsIndex.indices.lunrIndex.search(queryVal).map(resultFile => { return resultFile })
-                } catch (error) {
-                    this.searchDisplayResults = { ...this.searchDisplayResults, errorMsg: error }
-                    this.resetAllItems()
-                    return false
-                }
-                const resultIds = results.map(resultFile => resultFile.ref)
-                console.log(`resultdIds: ${resultIds}`)
-                this.searchTableResults = { ...this.searchTableResults, resultIds: resultIds }
-                this.searchDisplayResults = { ...this.searchDisplayResults, totalDocuments: resultIds.length }
+            :query str - from text input, should match lunrjs patterns
+            :filter [] - selected files' ids
+            */
+           this.searchQuery.type = this.queryOptions[this.selectedIdx]
 
-                //get hit counts for individual doc and total docs
-                const resultGroups = []
-                for (let resultFile of results) {
-                    let new_keys = Object.keys(resultFile.matchData.metadata)
-                    let counts = []
-                    let positions = []
-                    let rec = {}
-                    rec['ref'] = resultFile.ref
-                    rec['score'] = resultFile.score.toFixed(3)
-                    for (let key of new_keys) {
-                        counts.push(resultFile.matchData.metadata[key].clean_body.position.length)
-                        positions.push(...resultFile.matchData.metadata[key].clean_body.position)
-                    }
-                    rec['count'] = counts.reduce((pv, cv) => { return pv + cv }, 0)
-                    rec['positions'] = positions.sort(compareByFirstItem)
-                    resultGroups.push(rec)
-                }
-                let totalCount = 0
-                totalCount = resultGroups.reduce(function (pv, cv) { return pv + cv.count }, 0)
-                this.searchDisplayResults = { ...this.searchDisplayResults, count: totalCount }
-                this.searchTableResults = { ...this.searchTableResults, resultGroups: resultGroups }
-                console.log(`resultGroups (array of all hits within a doc): `); console.log(resultGroups)
+            console.log(`query: ${this.query}`)
+            this.searchTableResults = { ...this.searchTableResults, query: this.query }
+            this.searchDisplayResults = { ...this.searchDisplayResults, errorMsg: '' }
+            //const backticksLength = (this.query.match(/`/g) || []).length
+            //const checkBackticks = backticksLength > 0 && backticksLength % 2 == 0
 
+            // no query input
+            if (this.query.length === 0) {
+                this.resetAllItems()
                 this.$emit('search-table-results', this.searchTableResults)
+                return false
+
+                // exact phrase search using backticks
+            //} else if (checkBackticks) {
+            } else if (this.searchQuery.type.value == 'Exact') {
+                this.searchExact()
+                
+                // lunrJs query
+            //} else if (this.userContentStore.documentsIndex.indices.lunrIndex) {
+            } else if (this.searchQuery.type.value == 'Fuzzy' && this.userContentStore.documentsIndex.indices.lunrIndex) {
+                this.searchFuzzy()
             } else {
                 return false
             }
@@ -295,5 +332,11 @@ function removeDuplicatesUsingSet(arr) {
 <style scoped>
 .text {
     white-space: pre-wrap;
+}
+#table-panel{
+    padding-bottom: 30px;
+}
+#results-summary{
+    padding-left: 25px;
 }
 </style>
