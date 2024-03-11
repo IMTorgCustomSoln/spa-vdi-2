@@ -45,6 +45,9 @@ __Staging__
   - ~~searchExact() does not work~~
   - ~~fix Guide which no longer uses backticks: `checkBackticks`~~
   - implement concept search
+    + [orama client vector search db: full text and vector](https://github.com/askorama/orama)
+    + [mediapipe](https://developers.google.com/mediapipe/solutions/text/text_embedder/web_js)
+    + [winknlp](https://winkjs.org/wink-nlp/similarity.html)
 
 * important
   - fix PdfViewer highlight, text selection so that rectangle scales with change in viewer dimensions, similar to Search
