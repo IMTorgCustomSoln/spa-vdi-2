@@ -18,7 +18,7 @@
                 </template>
 
                 <b-form-input type="text" class="form-control" id="search-field" v-model="query" @input="searchQuery"
-                    placeholder="type search text here..." />
+                    :disabled="queryOptions[selectedIdx].disablePrompt" placeholder="type search text here..." />
             </b-input-group>
             <div id="results-summary">
                 <div v-if="searchDisplayResults.searchTerms">
@@ -65,8 +65,10 @@ export default {
         return {
             selectedIdx: 0,
             queryOptions: [
-                {id:0, value:'Fuzzy'},
-                {id:1, value:'Exact'}
+                {id:0, value:'Fuzzy', disablePrompt:false},
+                {id:1, value:'Exact', disablePrompt:false},
+                {id:2, value:'Concept', disablePrompt:false},
+                {id:3, value:'Models', disablePrompt:true}
             ],
             searchTableResults: {
                 type: null,
@@ -87,7 +89,12 @@ export default {
                 search: {
                     id: 'search',
                     title: 'Search Patterns',
-                    markdown: `The following are patterns used in search terms:
+                    markdown: `The following types of search are possible:
+* Fuzzy match - matches terms' stem to using different patterns
+* Exact match - precisely matches the terms
+* Concept search - finds terms that are conceptually similar
+* (Pre-run) Models search - work with models previously applied to the documents (no search terms necessary)
+                                        
 
 _Fuzzy match_ - terms are matched on their stem by default 
 * \`foo\` - all search is on stemmed terms so don't worry about case or word ending ('-ed', '-es', '-ing', ...)
@@ -98,9 +105,9 @@ _Fuzzy match_ - terms are matched on their stem by default
 * \`foo^10 bar\` - weight term foo 10-times the importance of bar
 * \`foo~1\` - one edit distance of foo (fuzzy matching)
 
-_Exact match_ - terms surrounded by backticks '\`' (not quotes) are matched exactly (case sensitive)\n` +
-                        '* \`` `foo bar` `\` - single exact match \n' +
-                        '* \`` `foo bar` `\` \`` `bar baz` `\` - multiple exact matches\n' +
+_Exact match_ - terms are matched exactly (case sensitive)\n` +
+                        '* \`foo bar\` - single exact match \n' +
+                        '* \`foo bar, bar baz\` - multiple exact matches separated by comma\n' +
                         `
 The results are ordered by the 'Score' column, which is a weighted formula of the matching pattern.`
                 }
@@ -190,6 +197,23 @@ The results are ordered by the 'Score' column, which is a weighted formula of th
             const phrases = []
                 let substr = ''
                 let select = false
+                //phrases are separated by commas ','
+                if( this.query.includes(',') == false ){
+                    phrases.push(this.query)
+                } else {
+                    for (let char of this.query) {
+                        if (char == ',' && select == false) {
+                            select = true
+                        } else if (char == ',' && select == true) {
+                            select = false
+                            phrases.push(substr)
+                            substr = ''
+                        } else if (select) {
+                            substr += char
+                        }
+                    }
+                }
+                /*
                 for (let char of this.query) {
                     if (char == '`' && select == false) {
                         select = true
@@ -200,7 +224,7 @@ The results are ordered by the 'Score' column, which is a weighted formula of th
                     } else if (select) {
                         substr += char
                     }
-                }
+                }*/
                 //select hits for each phrase
                 const resultGroups = []
                 try {
@@ -244,6 +268,12 @@ The results are ordered by the 'Score' column, which is a weighted formula of th
                 this.$emit('search-table-results', this.searchTableResults)
 
         },
+        searchConcept(){
+
+        },
+        searchModel(){
+
+        },
         searchQuery() {
             /* Provide tableFilter of selected rows' id based on `this.query` input
 
@@ -259,15 +289,25 @@ The results are ordered by the 'Score' column, which is a weighted formula of th
             //const checkBackticks = backticksLength > 0 && backticksLength % 2 == 0
 
             // no query input
-            if (this.query.length === 0) {
+            if (this.query == null){
+                return false
+
+            } else if(this.query.length === 0) {
                 this.resetAllItems()
                 this.$emit('search-table-results', this.searchTableResults)
                 return false
 
-                // exact phrase search using backticks
-            //} else if (checkBackticks) {
+                // exact phrase search
             } else if (this.searchQuery.type.value == 'Exact') {
                 this.searchExact()
+
+                // concept search
+            } else if (this.searchQuery.type.value == 'Concept') {
+                this.searchConcept()
+
+                // prior-run models search
+            } else if (this.searchQuery.type.value == 'Models') {
+                this.searchModel()
                 
                 // lunrJs query
             //} else if (this.userContentStore.documentsIndex.indices.lunrIndex) {

@@ -42,8 +42,9 @@ __Staging__
 
 * search 
   - ~~dropdown for search type~~
-  - searchExact() does not work
-  - fix Guide which no longer uses backticks: `checkBackticks`
+  - ~~searchExact() does not work~~
+  - ~~fix Guide which no longer uses backticks: `checkBackticks`~~
+  - implement concept search
 
 * important
   - fix PdfViewer highlight, text selection so that rectangle scales with change in viewer dimensions, similar to Search
