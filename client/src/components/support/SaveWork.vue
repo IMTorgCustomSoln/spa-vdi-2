@@ -73,8 +73,8 @@ export default {
             description: true,
             config: {
                 fileHandle: '',
-                fileName: '',
-                fileSize: '',
+                fileName: '<TBD>',
+                fileSize: '<TBD>',
                 autoSave: true,
             },
             resultDisplay: {
@@ -93,9 +93,16 @@ export default {
         async saveWorkStream(e){
             //TODO:initiate this method for any data change 
             const create = e.target
+            await toRaw(this.userContentStore.documentsIndex)['documents'].forEach(
+                async (value, idx, arr)=>{
+                    const result = await value.getDataArray()
+                    value.dataArray = result['dataArray']
+                    //const check = await value.prepareForSave()
+                    arr[idx] = value
+                })
             const object = {
-                documentsIndex: this.documentsIndex,
-                managedNotes: this.managedNotes
+                documentsIndex: toRaw(this.userContentStore.documentsIndex),
+                managedNotes: toRaw(this.userContentStore.managedNotes)
             }
             try {
                 const readStream = new Blob( [JSON.stringify(object)], { type: 'application/json' }).stream()
@@ -122,6 +129,8 @@ export default {
                 this.resultDisplay.error = `The Workspace Save failed for the following error:&nbsp
                                             ${err.name}: ${err.message}`;
                 console.error(err.name, err.message);
+              } finally{
+                await toRaw(this.userContentStore.documentsIndex)['documents'].forEach((value, key, map)=>{value.prepareForIndexDb()})
               }
               //this.$bvModal.hide("save-continue-modal"), note:must be above o/w user may close browser before save is complete
         },

@@ -53,10 +53,11 @@ export const ManagedNotesData = ref({
 export class DocumentRecord{
   constructor(
     id, reference_number, filepath, filename_original, filename_modified, 
-    file_extension, filetype, page_nos, dataArray, length_lines, file_size_mb, date,
+    file_extension, filetype, page_nos, dataArrayKey, dataArray, length_lines, file_size_mb, date,
     title, author, subject, toc, pp_toc, 
     body_pages, body, clean_body, readability_score, tag_categories, keywords, summary
     ){
+      //inline
       //file indexing
       this.id = id
       this.reference_number = reference_number
@@ -68,7 +69,8 @@ export class DocumentRecord{
       this.file_extension = file_extension
       this.filetype = filetype 
       this.page_nos = page_nos
-      this.dataArrayKey =                    //dataArray          //Uint8Array
+      this.dataArrayKey = dataArrayKey          //Uint8Array
+      this.dataArray = null
       this.length_lines = length_lines    //sentences
       this.file_size_mb = file_size_mb 
       this.date = date
@@ -105,10 +107,13 @@ export class DocumentRecord{
       this._activeDetailsTab = 0
       this.accumPageLines = null
     }
-
+    
     async setDataArray(arrayBlob){
       const randomSeed = Math.floor(Math.random() * 100)
       const refId = ''.hashCode(randomSeed)
+      if(arrayBlob==null){
+        arrayBlob = this.dataArray
+      }
       const arrayRecord = [{dataArrayKey: refId, dataArray: arrayBlob}]
       const check = await updateItemsInStore(DatabaseName, DbVersion, StoreNameDocumentRecord, arrayRecord)
       if(check){
@@ -120,6 +125,68 @@ export class DocumentRecord{
       const dataArray = await getItemFromStore(DatabaseName, DbVersion, StoreNameDocumentRecord, this.dataArrayKey)
       return dataArray
     }
+    async prepareForSave(){
+      this.dataArray = await this.getDataArray()
+      return true
+    }
+    async prepareForIndexDb(){
+      this.dataArray = null
+      return true
+    }
+    setAttrWithObj(obj){
+
+      //inline
+      //file indexing
+      this.id = obj.id
+      this.reference_number = obj.reference_number
+      this.filepath = obj.filepath
+      this.filename_original = obj.filename_original
+      this.filename_modified = obj.filename_modified
+
+      //raw
+      this.file_extension = obj.file_extension
+      this.filetype = obj.filetype 
+      this.page_nos = obj.page_nos
+      this.dataArrayKey = obj.dataArrayKey          //Uint8Array
+      this.dataArray = obj.dataArray
+      this.length_lines = obj.length_lines    //sentences
+      this.file_size_mb = obj.file_size_mb 
+      this.date = obj.date
+
+      //inferred / searchable
+      this.title = obj.title
+      this.author = obj.author 
+      this.subject = obj.subject
+      this.toc = obj.toc
+      this.pp_toc = obj.pp_toc
+
+      this.body_chars = obj.body_chars
+      this.body_pages = obj.body_pages
+      this.length_lines_array = obj.length_lines_array
+      this.length_lines = obj.length_lines
+      this.body = obj.body
+      this.clean_body = obj.clean_body
+      this.readability_score = obj.readability_score
+      this.tag_categories = obj.tag_categories
+      this.keywords = obj.keywords
+      this.summary = obj.summary
+
+      //added by frontend
+      this.html_body = obj.html_body
+      this.date_created = obj.date_created
+      this.date_mod = obj.date_mod
+      this.canvas_array = obj.canvas_array
+
+      this.sort_key = obj.sort_key
+      this.hit_count = obj.hit_count
+      this.snippets = obj.snippets
+      this.selected_snippet_page = obj.selected_snippet_page
+      this._showDetails = obj._showDetails
+      this._activeDetailsTab = obj._activeDetailsTab
+      this.accumPageLines = obj.accumPageLines
+    }
+
+
 }
 
 /*

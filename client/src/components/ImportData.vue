@@ -413,6 +413,13 @@ export default {
                 buffer += new TextDecoder().decode(value)
             }
             const object = JSON.parse(buffer)
+            await object.documentsIndex['documents'].forEach(
+                async (value, idx, arr)=>{
+                    const doc_rec = new DocumentRecord()
+                    doc_rec.setAttrWithObj(value)
+                    await doc_rec.setDataArray()
+                    arr[idx] = doc_rec
+                })
 
             this.userContentStore.documentsIndex.documents.length = 0
             this.userContentStore.managedNotes.topics.length = 0
@@ -585,6 +592,8 @@ function processFiles(files) {
         const rec = new DocumentRecord
         item.setDataArray = rec.setDataArray
         item.getDataArray = rec.getDataArray
+        item.prepareForSave = rec.prepareForSave
+        item.prepareForIndexDb = rec.prepareForIndexDb
 
         // body items
         let bodyArr = Object.values(item.body_pages)
