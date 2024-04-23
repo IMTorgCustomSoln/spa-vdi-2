@@ -187,9 +187,10 @@ import { ExportLogsFileName } from '@/stores/constants.js'
 import { DocumentRecord } from '@//stores/data.js'
 
 import { getFileRecord } from '@/components/support/pdf_extract.js'
-import { getEstimatedProcessTime, getFormattedMilliseconds } from '@/components/support/utils.js'
+import { isEmpty, getEstimatedProcessTime, getFormattedMilliseconds } from '@/components/support/utils.js'
 import { getDateFromJsNumber, getFormattedFileSize, getFileReferenceNumber } from '@/components/support/utils.js'
 
+import { toRaw } from 'vue'
 import { mapStores } from 'pinia'
 import { useAppDisplay } from '@/stores/AppDisplay'
 import { useUserContent } from '@/stores/UserContent'
@@ -413,13 +414,32 @@ export default {
                 buffer += new TextDecoder().decode(value)
             }
             const object = JSON.parse(buffer)
+            for(const [idx, doc] of Object.entries(object.documentsIndex.documents) ){
+                const doc_rec = new DocumentRecord()
+                const check1 = await doc_rec.setAttrWithObj(doc)
+                if(doc_rec.accumPageChars==null){
+                    const check2 = await doc_rec.setProcessedFileData()
+                }
+                const check3 = await doc_rec.setDataArray()
+                object.documentsIndex.documents[idx] = doc_rec
+            }
+            /*documents
             await object.documentsIndex['documents'].forEach(
-                async (value, idx, arr)=>{
+                async function(value, idx, arr){
                     const doc_rec = new DocumentRecord()
                     doc_rec.setAttrWithObj(value)
-                    await doc_rec.setDataArray()
-                    arr[idx] = doc_rec
-                })
+                    if(doc_rec.accumPageChars==null){
+                        const check1 = await doc_rec.setProcessedFileData()
+                    }
+                    const check2 = await doc_rec.setDataArray()
+                    if(check2){
+                        arr[idx] = doc_rec
+                    }
+                })*/
+            //lunr index
+            if(isEmpty(object.documentsIndex.indices.lunrIndex)==true){
+                this.userContentStore.createIndex( object.documentsIndex['documents'] )
+            }
 
             this.userContentStore.documentsIndex.documents.length = 0
             this.userContentStore.managedNotes.topics.length = 0
@@ -569,50 +589,10 @@ function processFiles(files) {
     // process files selected for upload and return an array of records
     const processedFiles = []
     for (const file of files) {
-        const item = JSON.parse(JSON.stringify(file))
-
-        // row items
-        let length_lines = 0
-        if (item.length_lines_array.length > 0) {
-            if (item.length_lines_array.length > 1) {
-                length_lines = item.length_lines_array.reduce((s, v) => s += (v | 0))
-            } else {
-                length_lines = item.length_lines_array[0]
-            }
-        } else {
-            length_lines = 1;
+        const check = file.setProcessedFileData()
+        if(check){
+            processedFiles.push(file)
         }
-        item.length_lines = length_lines
-
-        let dt = getDateFromJsNumber(item.date)
-        item.original_date = item.date
-        item.date = dt;
-
-        // add methods
-        const rec = new DocumentRecord
-        item.setDataArray = rec.setDataArray
-        item.getDataArray = rec.getDataArray
-        item.prepareForSave = rec.prepareForSave
-        item.prepareForIndexDb = rec.prepareForIndexDb
-
-        // body items
-        let bodyArr = Object.values(item.body_pages)
-        item.body = bodyArr.length > 0 ? bodyArr.reduce((partialSum, a) => partialSum += (a || 0)) : ''
-        let clean_body = item.body
-        item.clean_body = clean_body
-        item.html_body = clean_body     //.replaceAll("\n\n", "<br>")
-        item.summary = clean_body.slice(0, 500)   //TODO:apply model to summarize text
-        item.pp_toc = item.toc.map(section => `${section.title} (pg.${section.pageNumber})`)
-
-        // prepare page numbers for search snippets
-        //item.accumPageLines = item.length_lines_array.map((sum => value => sum += value)(0))    //.map((sum = 0, n => sum += n))  -> assignment to undeclared variable
-        let charArr = Object.values(item.body_chars)
-        item.accumPageChars = charArr.map((sum => value => sum += value)(0))    //.map((sum = 0, n => sum += n))  -> assignment to undeclared variable
-        // prepare images
-        item.canvas_array = item.canvas_array.sort((a, b) => a.idx - b.idx)
-        item.selected_snippet_page = 1
-
-        processedFiles.push(item)
     }
     return processedFiles;
 }

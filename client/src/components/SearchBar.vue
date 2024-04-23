@@ -50,7 +50,8 @@ export default {
                 if (Array.isArray(this.$props.records) &&
                     this.$props.records.length > 0
                 ) {
-                    this.createIndex()
+                    //this.createIndex()
+                    this.userContentStore.createIndex(this.$props.records)
                 }
             },
             deep: true
@@ -115,7 +116,8 @@ The results are ordered by the 'Score' column, which is a weighted formula of th
         }
     },
     mounted() {
-        this.createIndex()
+        //this.createIndex()
+        this.userContentStore.createIndex(this.$props.records)
     },
     computed: {
         ...mapStores(useUserContent),
@@ -128,7 +130,7 @@ The results are ordered by the 'Score' column, which is a weighted formula of th
             this.selectedIdx = option.id
             console.log(option.id)
             this.searchQuery()
-        },
+        },/*
         createIndex() {
             //create lunr index
             const records = this.$props.records
@@ -142,7 +144,7 @@ The results are ordered by the 'Score' column, which is a weighted formula of th
             })
             //add to context
             this.userContentStore.documentsIndex.indices.lunrIndex = lunrIndex
-        },
+        },*/
         continueWorkspaceIndex() {
             //TODO: use previous index if saved Workspace file is loaded
         },

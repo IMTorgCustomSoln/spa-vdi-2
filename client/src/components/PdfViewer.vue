@@ -70,7 +70,7 @@ export default {
         getPath() { return this.pathViewer + this.query + this.pathFile },
         async getApp() { return await document.getElementById('pdf-js-viewer').contentWindow.PDFViewerApplication },
         getDocument() {
-            const docIndex = this.userContentStore.selectedDocument
+            const docIndex = this.userContentStore.getSelectedDocument
             return this.userContentStore.documentsIndex.documents[docIndex]
         }
     },

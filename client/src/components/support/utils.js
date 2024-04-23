@@ -2,6 +2,19 @@ import * as model from "@/../tests/py/results.json"
 
 
 
+// Checks
+
+export function isEmpty(obj) {
+  for (const prop in obj) {
+    if (Object.hasOwn(obj, prop)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+
 // ProcessData
 
 export function getEstimatedProcessTime(fileCount, fileSizeInBytes){

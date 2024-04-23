@@ -1,6 +1,7 @@
 
 import {ref} from 'vue'
 
+import { getDateFromJsNumber, getFormattedFileSize, getFileReferenceNumber } from '@/components/support/utils.js'
 import { camelize } from '@/components/support/utils.js'
 import * as utils from '@/components/support/utils.js'
 import { DatabaseName, DbVersion, StoreNameDocumentRecord, StoreNamesAndKeyFields } from './constants.js'
@@ -71,7 +72,7 @@ export class DocumentRecord{
       this.page_nos = page_nos
       this.dataArrayKey = dataArrayKey          //Uint8Array
       this.dataArray = null
-      this.length_lines = length_lines    //sentences
+      this.length_lines = length_lines          //sentences
       this.file_size_mb = file_size_mb 
       this.date = date
 
@@ -107,8 +108,56 @@ export class DocumentRecord{
       this._activeDetailsTab = 0
       this.accumPageLines = null
     }
-    
-    async setDataArray(arrayBlob){
+    async setProcessedFileData(){
+      //const item = JSON.parse(JSON.stringify(file))
+
+
+      /* row items
+      let length_lines = 0
+      if (this.length_lines_array.length > 0) {
+          if (this.length_lines_array.length > 1) {
+              length_lines = this.length_lines_array.reduce((s, v) => s += (v | 0))
+          } else {
+              length_lines = this.length_lines_array[0]
+          }
+      } else {
+          length_lines = 1;
+      }
+      this.length_lines = length_lines
+
+      let dt = getDateFromJsNumber(this.date)
+      this.original_date = this.date
+      this.date = dt;
+
+      /* add methods
+      const rec = new DocumentRecord
+      this.setDataArray = rec.setDataArray
+      this.getDataArray = rec.getDataArray
+      this.prepareForSave = rec.prepareForSave
+      this.prepareForIndexDb = rec.prepareForIndexDb
+      */
+
+      // body items
+      let bodyArr = Object.values(this.body_pages)
+      this.body = bodyArr.length > 0 ? bodyArr.reduce((partialSum, a) => partialSum += (a || 0)) : ''
+      let clean_body = this.body
+      this.clean_body = clean_body
+      this.html_body = clean_body     //.replaceAll("\n\n", "<br>")
+      this.summary = clean_body.slice(0, 500)   //TODO:apply model to summarize text
+      this.pp_toc = this.toc.map(section => `${section.title} (pg.${section.pageNumber})`)
+
+      // prepare page numbers for search snippets
+      //item.accumPageLines = item.length_lines_array.map((sum => value => sum += value)(0))    //.map((sum = 0, n => sum += n))  -> assignment to undeclared variable
+      let charArr = Object.values(this.body_chars)
+      this.accumPageChars = charArr.map((sum => value => sum += value)(0))    //.map((sum = 0, n => sum += n))  -> assignment to undeclared variable
+      // prepare images
+      //this.canvas_array = this.canvas_array.sort((a, b) => a.idx - b.idx)
+      this.selected_snippet_page = 1
+
+      //processedFiles.push(item)
+      return true
+    }
+    async setDataArray(arrayBlob=null){
       const randomSeed = Math.floor(Math.random() * 100)
       const refId = ''.hashCode(randomSeed)
       if(arrayBlob==null){
@@ -133,7 +182,7 @@ export class DocumentRecord{
       this.dataArray = null
       return true
     }
-    setAttrWithObj(obj){
+    async setAttrWithObj(obj){
 
       //inline
       //file indexing

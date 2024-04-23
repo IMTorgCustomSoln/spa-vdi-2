@@ -207,7 +207,8 @@ ready to be organized with the note Topics.`
     computed: {
         ...mapStores(useUserContent, useAppDisplay),
         getSearchSnippets() {
-            return this.items[this.userContentStore.selectedDocument].snippets
+            const selected = this.userContentStore.getSelectedDocument
+            return this.items[selected].snippets
         }
     },
     methods: {

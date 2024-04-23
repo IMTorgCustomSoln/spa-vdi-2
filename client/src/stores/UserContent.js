@@ -48,10 +48,25 @@ export const useUserContent = defineStore('userContent', {
           return []
         }
       }*/
+      getSelectedDocument: (state)=>state.selectedDocument > -1 ? state.selectedDocument : 0
     },
     actions:{
         getName(){
             return this.name
+        },
+        createIndex(records) {
+          //create lunr index
+          //const records = this.$props.records
+          const lunrIndex = lunr(function () {
+              this.ref('id')
+              this.field('clean_body')
+              this.metadataWhitelist = ['position']
+              records.forEach(function (rec) {
+                  this.add(rec)
+              }, this)
+          })
+          //add to context
+          this.documentsIndex.indices.lunrIndex = lunrIndex
         },
         setPlaceholders(){
           for(let idx=1; idx<=2; idx++){     //change for testing
