@@ -65,6 +65,7 @@ export default {
         //this.indices = DocumentIndexData.value.indices
         return {
             selectedIdx: 0,
+            query: '',
             queryOptions: [
                 {id:0, value:'Fuzzy', disablePrompt:false},
                 {id:1, value:'Exact', disablePrompt:false},
@@ -129,6 +130,7 @@ The results are ordered by the 'Score' column, which is a weighted formula of th
         changeItem(option){
             this.selectedIdx = option.id
             console.log(option.id)
+            this.resetAllItems()
             this.searchQuery()
         },/*
         createIndex() {
@@ -274,6 +276,58 @@ The results are ordered by the 'Score' column, which is a weighted formula of th
 
         },
         searchModel(){
+            /*
+            models = {"search":"FS","target":" Do we each want to do an intro or something?","timestamp":[0,1.8],"pred":1}
+            steps:
+                * <Table> $props.search
+                * filterTable()
+                * expandAdditionalInfo(row) > createSearchSnippets(row, MARGIN = 250)
+                * v-if='models' , then show selectable confidence_level range
+            
+            */
+           this.query = '< pre-run models >'
+           const phrases = []
+           const type = null
+           const query = ''
+           const resultIds = []
+           const resultGroups = []
+           for(const [idx, rec] of Object.entries(this.$props.records) ){
+            resultIds.push(rec.id)
+            const sum = rec.models.map(item => item.pred).reduce((partial_sum, a) => partial_sum + a,0)
+            const totalScore = sum / rec.models.length
+            const result = {
+                            ref: rec.id,
+                            phrase: [],
+                            score: String(totalScore),
+                            count: 0,
+                            positions: []
+                        }
+            for(const model of rec.models){
+                const hit = rec.clean_body.includes(model.target)
+                if (hit) {
+                    const indices = getIndicesOf(model.target, rec.clean_body, true)
+                    result.phrase.push( model.target ) //String([model.timestamp]) )                 //TODO:ISSUE - `[0,N.N]` should be a complete string from python
+                    result.count = result.count + indices.length
+                    result.positions.push(...indices)
+                }
+            }
+            resultGroups.push(result)
+            }
+            const totalCount = resultGroups.map(item => item.positions.length).map((sum => value => sum += value)(0))[resultGroups.length - 1]
+            //const resultIds = removeDuplicatesUsingSet(resultGroups.filter(item => item.positions.length > 0).map(result => result.ref))
+            phrases.push( ...removeDuplicatesUsingSet(resultGroups.map(item => item.phrase)) )
+            const formattedPhrases = [phrases[0].slice(0,3).join('\u00A0 ...\n \u00A0\u00A0\u00A0\u00A0')]
+
+            this.searchDisplayResults = { ...this.searchDisplayResults, searchTerms: formattedPhrases }
+            this.searchDisplayResults = { ...this.searchDisplayResults, totalDocuments: resultIds.length }
+            this.searchDisplayResults = { ...this.searchDisplayResults, count: totalCount }
+
+            this.searchTableResults = { ...this.searchTableResults, query: this.query }
+            this.searchTableResults = { ...this.searchTableResults, searchTerms: phrases }
+            this.searchTableResults = { ...this.searchTableResults, resultIds: resultIds }
+            this.searchTableResults = { ...this.searchTableResults, resultGroups: resultGroups }
+
+            this.$emit('search-table-results', this.searchTableResults)
 
         },
         searchQuery() {
@@ -291,10 +345,10 @@ The results are ordered by the 'Score' column, which is a weighted formula of th
             //const checkBackticks = backticksLength > 0 && backticksLength % 2 == 0
 
             // no query input
-            if (this.query == null){
+            if (this.query == null && this.searchQuery.type.disablePrompt == false){
                 return false
 
-            } else if(this.query.length === 0) {
+            } else if(this.query.length === 0 && this.searchQuery.type.disablePrompt == false) {
                 this.resetAllItems()
                 this.$emit('search-table-results', this.searchTableResults)
                 return false
@@ -320,6 +374,7 @@ The results are ordered by the 'Score' column, which is a weighted formula of th
             }
         },
         resetAllItems() {
+            this.query = ''
             this.searchTableResults = { ...this.searchTableResults, query: '' }
             this.searchTableResults = { ...this.searchTableResults, resultIds: [] }
             this.searchTableResults = { ...this.searchTableResults, resultGroups: [] }

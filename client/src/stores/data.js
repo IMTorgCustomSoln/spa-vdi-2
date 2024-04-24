@@ -56,7 +56,7 @@ export class DocumentRecord{
     id, reference_number, filepath, filename_original, filename_modified, 
     file_extension, filetype, page_nos, dataArrayKey, dataArray, length_lines, file_size_mb, date,
     title, author, subject, toc, pp_toc, 
-    body_pages, body, clean_body, readability_score, tag_categories, keywords, summary
+    body_pages, body, clean_body, readability_score, tag_categories, keywords, summary, models
     ){
       //inline
       //file indexing
@@ -93,6 +93,7 @@ export class DocumentRecord{
       this.tag_categories = tag_categories
       this.keywords = keywords
       this.summary = summary
+      this.models = models
 
       //added by frontend
       this.html_body = null
@@ -219,6 +220,7 @@ export class DocumentRecord{
       this.tag_categories = obj.tag_categories
       this.keywords = obj.keywords
       this.summary = obj.summary
+      this.models = obj.models
 
       //added by frontend
       this.html_body = obj.html_body

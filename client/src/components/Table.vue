@@ -82,7 +82,7 @@
                     <div class="itemconfiguration snippet_container">
                         <h3>Search Results</h3>
                         <div>
-                            <b>Search results in {{ getSearchSnippets.length }} hits: </b>
+                            <b>Search results in {{ getSearchSnippets.length }} text-block hits: </b>
                             <Guide v-bind="guides.snippet" />
                             <div v-if="getSearchSnippets.length < 1">Select a document from the table.</div>
                         </div>

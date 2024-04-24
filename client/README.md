@@ -46,8 +46,8 @@ python create_estimation_model.py --input_dir = "./tests/logs/"
 * Read
   - ~~file selection
   - ~~snippets
-  - reader highlighter selection
-  - model highlighter
+  - ~~reader highlighter selection
+  - ~~model highlighter
 * Notes
   - Export
   - Import
