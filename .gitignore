@@ -1,7 +1,9 @@
 #Custom
 .DS_Store
-tests/data/broken_examples/
-tests/data/profiles/
+#client/tests/data/broken_examples/
+#client/tests/data/profiles/
+pipeline/pretrained_models/*
+pipeline/runs/*
 
 # Python Byte-compiled / optimized / DLL files
 __pycache__/

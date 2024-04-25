@@ -1,0 +1,16 @@
+{
+    "records":[
+        {"text": "I got the flu and felt very bad.",
+         "label": "positive"
+         },
+        {"text": "I got a raise and feel great.",
+         "label": "negative"
+         },
+        {"text": "This bank is awful.",
+         "label": "negative"
+         },
+        {"text": "He company laid him off.",
+         "label": "positive"
+         }
+         ]
+}

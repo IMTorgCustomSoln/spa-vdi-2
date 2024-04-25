@@ -25,8 +25,6 @@ python create_estimation_model.py --input_dir = "./tests/logs/"
 ## References
 
 * Bootstrap-vue is not quite ready for Vue3 (explained [here](https://bootstrap-vue.org/vue3))
-  - bootstrap-vue and vuetify are the most popular css frameworks
-  - primevue seems to have many components / features and is steadily increasing in popularity
 * Vue3 compat(ability) [setup](https://stackblitz.com/edit/bootstrap-vue-with-compat?file=main.js) is used
 
 

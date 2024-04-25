@@ -1,0 +1,8 @@
+{"chunks":[
+ {"timestamp": [0.0, 8.0], "text": "...."},
+ {"timestamp": [8.0, 16.0], "text": "...."},
+ {"timestamp": [16.0, 20.0], "text": "...."},
+ {"timestamp": [0.0, 7.0], "text": "...."},
+ {"timestamp": [7.0, 10.0], "text": "...."},
+ {"timestamp": [10.0, 18.0], "text": "...."}
+]}
