@@ -3,9 +3,17 @@
 Module Docstring
 """
 
+from src import prepare_models
 from src import asr
+from src.modules import utils
 import os
 from pathlib import Path
+
+
+def test_prepare_models():
+    tmp = prepare_models.finetune()
+    assert tmp == True
+
 
 def test_asr_workflow():
     #load data
@@ -22,14 +30,6 @@ def test_asr_workflow():
     assert len(pdfs) > 0
 
 
-from src import prepare_models
-
-def test_prepare_models():
-    tmp = prepare_models.finetune()
-    assert tmp == True
-
-
-from src.modules import utils
 def test_export_to_vdi_workspace():
     #assume: workspace comes from vdi import/export of file: `./tests/results/five-nights-spoken-pitched_71bpm_F_minor.wav.pdf`
     #load data

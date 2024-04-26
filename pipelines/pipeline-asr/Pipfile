@@ -8,6 +8,12 @@ setfit = "*"
 transformers = "==4.36.0"
 fpdf = "*"
 pypdf = "*"
+pytest = "*"
+python-dotenv = "*"
+"pyannote.audio" = "*"
+speechbrain = "==0.5.16"
+datasets = "*"
+logzero = "*"
 
 [dev-packages]
 

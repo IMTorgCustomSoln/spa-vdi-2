@@ -1,8 +1,10 @@
 
 
 from pathlib import Path
+import os
 import json
-
+import gzip, zipfile
+import shutil
 
 
 
@@ -10,6 +12,75 @@ import json
 #TODO:determine valididty of audio files
 #ref: https://librosa.org/doc/main/generated/librosa.util.valid_audio.html
 
+def absoluteFilePaths(directory):
+    for dirpath,_,filenames in os.walk(directory):
+        for f in filenames:
+            yield Path( os.path.abspath(os.path.join(dirpath, f)) )
+
+
+def get_decompressed_filepath(filepath, target_extension=[]):
+    """Return path of all decompressed files.
+    
+    Check if file is compressed.  Provide file path if it is not.  If it is, then decompress
+    to directory, and return files of correct target extension.
+
+    ref: https://stackoverflow.com/questions/3703276/how-to-tell-if-a-file-is-gzip-compressed
+    """
+    #zip format options
+    suffixes_archives = ['.gz', '.zip']
+    def gz_file(filepath):
+        with gzip.open(filepath, 'rb') as f_in:
+            f_out_name = f'{filepath}.OUT'
+            with open(f_out_name, 'wb') as f_out:
+                shutil.copyfileobj(f_in, f_out)
+        return f_out_name
+    
+    def zip_file(filepath):
+        extract_dir = filepath.resolve().parent / 'tmp'
+        with zipfile.ZipFile(filepath, 'r') as zip_ref:
+            zip_ref.extractall(extract_dir)
+        files_to_keep = []
+        files_to_remove = []
+        for file in absoluteFilePaths(extract_dir):
+            if (len([tag for tag in ['.DS_Store','__MACOSX'] if tag not in str(file)] ) > 1):
+                final_file = shutil.move(file, filepath.resolve().parent)
+                files_to_keep.append(Path(final_file))
+            else:
+                files_to_remove.append(file)
+        for file in files_to_remove:
+            file.unlink()
+            if len(os.listdir(file.resolve().parent))==0:
+                file.resolve().parent.rmdir()               #TODO:fails to remove dirs under .../tmp/
+        return files_to_keep
+
+    options = {
+        b'\x1f\x8b': gz_file,
+        b'PK': zip_file
+    }
+
+    #workflow
+    filepath = Path(filepath)
+    if os.path.isdir(filepath):
+        return [None]
+    check_compressed = (False, b'')
+    with open(filepath, 'rb') as test_f:
+        bytes = test_f.read(2)
+        if (bytes == b'\x1f\x8b') or (bytes == b'PK'):
+            check_compressed = (True, bytes)
+
+    result = []
+    if not check_compressed[0] and filepath.suffix in target_extension:
+        result.append(filepath)
+    elif not check_compressed[0] and not filepath.suffix in suffixes_archives:
+        print(f'filepath bytes does not look like archive file, but contained suffix: {filepath.suffix}')
+        result.append(None)
+    else:
+        if check_compressed[1] in options.keys():
+            lst_of_filepaths = options[ check_compressed[1] ](filepath)
+            result.extend( lst_of_filepaths)
+        else:
+            print('ERROR: not a recognized decompression format')
+    return result
 
 
 def output_to_pdf(dialogue, filename=None, output_type='file'):

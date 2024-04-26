@@ -4,10 +4,17 @@ Module Docstring
 
 """
 
+from pathlib import Path
+import sys
+import json
+
 from src.modules import config_env
 
-from pathlib import Path
-import json
+sys.path.append(Path('config').absolute().as_posix() )
+from _constants import (
+    logger
+)
+#TODO: logger.info("Begin prepare_models")
 
 
 def finetune():

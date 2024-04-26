@@ -1,0 +1,6 @@
+#Custom
+.DS_Store
+#client/tests/data/broken_examples/
+#client/tests/data/profiles/
+pretrained_models/*
+runs/*

@@ -5,7 +5,7 @@ Test estimation model creation
 
 __author__ = "Jason Beach"
 __version__ = "0.1.0"
-__license__ = "MIT"
+__license__ = "AGPL-3.0"
 
 from tests.py.create_estimation_model import main
 

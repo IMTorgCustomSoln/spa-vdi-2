@@ -6,19 +6,19 @@ Module Docstring
 
 __author__ = "Your Name"
 __version__ = "0.1.0"
-__license__ = "MIT"
-
+__license__ = "AGPL-3.0"
 
 
 from src.modules import config_env
 
 import os
 from pathlib import Path
+import json
 
 
 
 
-def run_workflow(sound_files):
+def run_workflow(sound_files, intermediate_save_dir=None):
     """..."""
 
     config_env.config()
@@ -41,8 +41,8 @@ def run_workflow(sound_files):
 
     #prepare data
     from datasets import Dataset, Audio
-
-    audio_dataset = Dataset.from_dict({'audio': sound_files}).cast_column('audio', Audio())
+    sound_filepath_strings = [str(file) for file in sound_files if file != None]
+    audio_dataset = Dataset.from_dict({'audio': sound_filepath_strings}).cast_column('audio', Audio())
 
 
     #transcribe sample
@@ -77,6 +77,10 @@ def run_workflow(sound_files):
             'sampling_rate': sampling_rate, 
             'chunks': file['chunks']
             }
+        if intermediate_save_dir:
+            save_path = Path(intermediate_save_dir) / f'{file_name}.json'
+            with open(save_path, 'w') as f:
+                json.dump(record, f)
         dialogues.append(record)
 
 
@@ -125,22 +129,3 @@ def run_workflow(sound_files):
 
     
     return pdfs
-
-
-
-
-def wrapper(gen):
-  """Wrap generator with error-handling in-case of 
-  issues during inference => FAILS
-
-  References:
-    * [current method](https://stackoverflow.com/questions/11366064/handle-an-exception-thrown-in-a-generator)
-    * [different approach](https://stackoverflow.com/questions/76726452/how-to-add-exception-handling-during-inference-with-hugging-face)
-  """
-  while True:
-    try:
-      yield next(gen)
-    except StopIteration:
-      break
-    except Exception as e:
-      print(e) # or whatever kind of logging you want
