@@ -26,6 +26,14 @@ def get_decompressed_filepath(filepath, target_extension=[]):
 
     ref: https://stackoverflow.com/questions/3703276/how-to-tell-if-a-file-is-gzip-compressed
     """
+    def get_dirs_from_path(path):
+        result = []
+        for file in os.scandir(path):
+            if os.path.isdir(file):
+                if not any( [x in file.path for x in ['.DS_Store','__MACOSX']] ):
+                    result.append(file)
+        return result
+
     #zip format options
     suffixes_archives = ['.gz', '.zip']
     def gz_file(filepath):
@@ -36,21 +44,18 @@ def get_decompressed_filepath(filepath, target_extension=[]):
         return f_out_name
     
     def zip_file(filepath):
-        extract_dir = filepath.resolve().parent / 'tmp'
+        extract_dir = filepath.resolve().parent / 'UNZIPPED'
+        original_dirs = get_dirs_from_path(extract_dir)
         with zipfile.ZipFile(filepath, 'r') as zip_ref:
             zip_ref.extractall(extract_dir)
+        current_dirs = get_dirs_from_path(extract_dir)
+        new_dirs = list( set(current_dirs).difference(original_dirs) )
         files_to_keep = []
-        files_to_remove = []
-        for file in absoluteFilePaths(extract_dir):
-            if (len([tag for tag in ['.DS_Store','__MACOSX'] if tag not in str(file)] ) > 1):
-                final_file = shutil.move(file, filepath.resolve().parent)
-                files_to_keep.append(Path(final_file))
-            else:
-                files_to_remove.append(file)
-        for file in files_to_remove:
-            file.unlink()
-            if len(os.listdir(file.resolve().parent))==0:
-                file.resolve().parent.rmdir()               #TODO:fails to remove dirs under .../tmp/
+        #files_to_remove = []
+        for dir in new_dirs:
+            for file in absoluteFilePaths(dir):
+                if Path(file).suffix in ['.wav', '.mp3']:
+                    files_to_keep.append(file)
         return files_to_keep
 
     options = {

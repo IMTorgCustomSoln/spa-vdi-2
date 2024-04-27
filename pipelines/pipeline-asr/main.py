@@ -31,7 +31,7 @@ def main(args):
 
     try:
         INPUT_PATH = Path(args.input)
-        INTERMEDIATE_PATH = (INPUT_PATH / 'tmp').mkdir(parents=True, exist_ok=True)
+        INTERMEDIATE_PATH = (INPUT_PATH / 'UNZIPPED').mkdir(parents=True, exist_ok=True)
     except:
         logger.info(f"End process, execution took: {round(time.time() - start_time, 3)}sec")
         sys.exit()
@@ -50,6 +50,7 @@ def main(args):
     logger.info("Begin ingest file location")
     zip_files = [INPUT_PATH / file for file 
                  in os.listdir(INPUT_PATH) 
+                 #if file=='gettysburg.zip'
                  #if '_Calls_' in file
                  ]
     sound_files_list = []

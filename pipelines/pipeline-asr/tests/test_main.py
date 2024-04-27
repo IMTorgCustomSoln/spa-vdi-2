@@ -17,7 +17,8 @@ def test_main():
     main(args)
 
     #cleanup
-    Path('/workspaces/spa-vdi-2/pipelines/pipeline-asr/samples/gettysburg10.wav').unlink()
-    Path('/workspaces/spa-vdi-2/pipelines/pipeline-asr/samples/tmp/gettysburg').rmdir()
-    Path('/workspaces/spa-vdi-2/pipelines/pipeline-asr/samples/tmp/__MACOSX').rmdir()
+    Path('/workspaces/spa-vdi-2/pipelines/pipeline-asr/samples/UNZIPPED/gettysburg/gettysburg10.wav').unlink()
+    Path('/workspaces/spa-vdi-2/pipelines/pipeline-asr/samples/UNZIPPED/gettysburg').rmdir()
+    Path('/workspaces/spa-vdi-2/pipelines/pipeline-asr/samples/UNZIPPED/__MACOSX/gettysburg').rmdir()
+    Path('/workspaces/spa-vdi-2/pipelines/pipeline-asr/samples/UNZIPPED/__MACOSX').rmdir()
     assert True == True
