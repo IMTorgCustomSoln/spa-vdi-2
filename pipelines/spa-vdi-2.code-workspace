@@ -5,6 +5,9 @@
 		},
 		{
 			"path": "pipeline-asr"
+		},
+		{
+			"path": "../client"
 		}
 	],
 	"settings": {}

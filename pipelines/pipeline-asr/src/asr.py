@@ -77,10 +77,6 @@ def run_workflow(sound_files, intermediate_save_dir=None):
             'sampling_rate': sampling_rate, 
             'chunks': file['chunks']
             }
-        if intermediate_save_dir:
-            save_path = Path(intermediate_save_dir) / f'{file_name}.json'
-            with open(save_path, 'w') as f:
-                json.dump(record, f)
         dialogues.append(record)
 
 
@@ -92,11 +88,24 @@ def run_workflow(sound_files, intermediate_save_dir=None):
         for chunk in dialogue['chunks']:
             results = classifier(chunk)
             for result in results:
-               if result != None:
-                  dialogues[idx]['classifier'].append(result)
+                if result != None:
+                    dialogues[idx]['classifier'].append(result)
+                else:
+                    dialogues[idx]['classifier'].append([])
+               
 
 
-    #format output
+    #save
+    from src.modules import utils
+
+    if intermediate_save_dir:
+        for dialogue in dialogues:
+            save_path = Path(intermediate_save_dir) / f'{dialogue["file_name"]}.json'
+            with open(save_path, 'w') as f:
+                json.dump(dialogues, f)
+
+
+    #format and output
     from src.modules import utils
 
     pdfs = []

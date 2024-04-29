@@ -84,18 +84,20 @@
                         <div>
                             <b>Search results in {{ getSearchSnippets.length }} text-block hits: </b>
                             <Guide v-bind="guides.snippet" />
-                            <div v-if="getSearchSnippets.length < 1">Select a document from the table.</div>
-                        </div>
-                        <div id="search-results" v-for="(snippet, index) in getSearchSnippets">
-                            <div class="snippet" @click="selectSnippetPage(index, snippet)">
-                                <div v-html="snippet"></div>
-                                <!--
-                                    <span :id="row.item.filepath + '-index_' + index" v-html="snippet"></span>
-                                    <b-button size="sm" v-on:click="postNote($event)">Note
-                                    </b-button>-->
+                        </div>    
+                            <div v-if="getSearchSnippets.length < 1" @click="selectSnippetPage(this.userContentStore.getSelectedDocument, '')">
+                                Select a document from the table.
                             </div>
-                            <br />
-                        </div>
+                            <div v-else id="search-results" v-for="(snippet, index) in getSearchSnippets">
+                                <div class="snippet" @click="selectSnippetPage(index, snippet)">
+                                    <div v-html="snippet"></div>
+                                    <!--
+                                        <span :id="row.item.filepath + '-index_' + index" v-html="snippet"></span>
+                                        <b-button size="sm" v-on:click="postNote($event)">Note
+                                        </b-button>-->
+                                </div>
+                                <br />
+                            </div>
                     </div>
                 </div>
             </b-col>
@@ -207,8 +209,8 @@ ready to be organized with the note Topics.`
     computed: {
         ...mapStores(useUserContent, useAppDisplay),
         getSearchSnippets() {
-            const selected = this.userContentStore.getSelectedDocument
-            return this.items[selected].snippets
+            const selected = this.userContentStore.getSelectedDocument.toString()
+            return this.items.filter(item => item.id==selected)[0].snippets
         }
     },
     methods: {
@@ -299,6 +301,9 @@ ready to be organized with the note Topics.`
                         console.log(positionGroups)
 
                         //create array of snippts
+                        if(positionGroups.length == 0){
+                            item.snippets.push([null,null])
+                        }else{
                         for (let grp of positionGroups) {
                             const snippet = []
                             /*
@@ -354,6 +359,7 @@ ready to be organized with the note Topics.`
                             }
                             item.snippets.push(snippet.join(''))
                         }
+                        }
                         //END
 
                     }
@@ -401,7 +407,7 @@ ready to be organized with the note Topics.`
         expandAdditionalInfo(row) {
             //TODO:note
             this.selectedItem = row.id
-            this.userContentStore.selectedDocument = row.id - 1
+            this.userContentStore.selectedDocument = row.id
 
             if (this.appDisplayStore.views.viewSelection == 'search') {
                 row._showDetails = !row._showDetails

@@ -44,7 +44,7 @@ def get_decompressed_filepath(filepath, target_extension=[]):
         return f_out_name
     
     def zip_file(filepath):
-        extract_dir = filepath.resolve().parent / 'UNZIPPED'
+        extract_dir = filepath.resolve().parent / 'PROCESSED'
         original_dirs = get_dirs_from_path(extract_dir)
         with zipfile.ZipFile(filepath, 'r') as zip_ref:
             zip_ref.extractall(extract_dir)
@@ -177,7 +177,7 @@ import io
 import gzip
 import copy
 
-def export_to_vdi_workspace(pdfs):
+def export_to_vdi_workspace(pdfs, filepath):
     """..."""
 
     #get schema
@@ -192,6 +192,7 @@ def export_to_vdi_workspace(pdfs):
     for k,v in sample_item.items():
         sample_item[k] = None
     documents_schema = copy.deepcopy(sample_item)
+    #TODO:move^^^ to preparation functions
 
     #load documents
     documents = []
@@ -286,7 +287,8 @@ def export_to_vdi_workspace(pdfs):
     #list( pdf['byte_string'] )
 
     #export
-    filepath_export_wksp_gzip = Path('./tests/results/VDI_ApplicationStateData_vTEST.gz')
+    #filepath_export_wksp_gzip = Path('./tests/results/VDI_ApplicationStateData_vTEST.gz')
+    filepath_export_wksp_gzip = filepath
 
     with gzip.open(filepath_export_wksp_gzip, 'wb') as f_out:
         f_out.write( bytes(json.dumps(workspace_schema), encoding='utf8') )

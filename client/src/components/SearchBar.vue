@@ -291,10 +291,12 @@ The results are ordered by the 'Score' column, which is a weighted formula of th
            const query = ''
            const resultIds = []
            const resultGroups = []
+
            for(const [idx, rec] of Object.entries(this.$props.records) ){
             resultIds.push(rec.id)
-            const sum = rec.models.map(item => item.pred).reduce((partial_sum, a) => partial_sum + a,0)
-            const totalScore = sum / rec.models.length
+            const sum = rec.models.map(item => item.pred)
+                                    .reduce((partial_sum, a) => partial_sum + a,0)
+            const totalScore = rec.models.length > 0 ? sum / rec.models.length : 0
             const result = {
                             ref: rec.id,
                             phrase: [],

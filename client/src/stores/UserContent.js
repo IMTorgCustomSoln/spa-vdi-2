@@ -14,7 +14,7 @@ export const useUserContent = defineStore('userContent', {
             //documents: [],
 
             //permanent
-            selectedDocument: 0,
+            selectedDocument: '1',
             selectedSnippet: null,
             
             documentsIndex: {

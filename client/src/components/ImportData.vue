@@ -414,6 +414,7 @@ export default {
                 buffer += new TextDecoder().decode(value)
             }
             const object = JSON.parse(buffer)
+            //documents
             for(const [idx, doc] of Object.entries(object.documentsIndex.documents) ){
                 const doc_rec = new DocumentRecord()
                 const check1 = await doc_rec.setAttrWithObj(doc)
@@ -423,19 +424,6 @@ export default {
                 const check3 = await doc_rec.setDataArray()
                 object.documentsIndex.documents[idx] = doc_rec
             }
-            /*documents
-            await object.documentsIndex['documents'].forEach(
-                async function(value, idx, arr){
-                    const doc_rec = new DocumentRecord()
-                    doc_rec.setAttrWithObj(value)
-                    if(doc_rec.accumPageChars==null){
-                        const check1 = await doc_rec.setProcessedFileData()
-                    }
-                    const check2 = await doc_rec.setDataArray()
-                    if(check2){
-                        arr[idx] = doc_rec
-                    }
-                })*/
             //lunr index
             if(isEmpty(object.documentsIndex.indices.lunrIndex)==true){
                 this.userContentStore.createIndex( object.documentsIndex['documents'] )

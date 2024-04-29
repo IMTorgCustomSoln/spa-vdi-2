@@ -34,10 +34,13 @@ export default {
         //TODO, note: event source is Table Snippets
         'userContentStore.selectedSnippet': {
             handler: async function (newVal, oldVal) {
-                const txtPg = parseInt(newVal.snippet.split('<b>pg.')[1].split('|')[0])
-                const pg = txtPg <= 1 ? txtPg : txtPg - 1
-                const tgtText = newVal.snippet.split('<b style="background-color: yellow">')[1].split('</b>')[0]
-
+                let pg = 0
+                let tgtText = ''
+                if(newVal.snippet!=''){
+                    const txtPg = parseInt(newVal.snippet.split('<b>pg.')[1].split('|')[0])
+                    pg = txtPg <= 1 ? txtPg : txtPg - 1
+                    tgtText = newVal.snippet.split('<b style="background-color: yellow">')[1].split('</b>')[0]
+                }
                 const app = await this.getApp
                 await this.loadDoc()
                 this.search(tgtText)
@@ -70,8 +73,8 @@ export default {
         getPath() { return this.pathViewer + this.query + this.pathFile },
         async getApp() { return await document.getElementById('pdf-js-viewer').contentWindow.PDFViewerApplication },
         getDocument() {
-            const docIndex = this.userContentStore.getSelectedDocument
-            return this.userContentStore.documentsIndex.documents[docIndex]
+            const docId = this.userContentStore.getSelectedDocument
+            return this.userContentStore.documentsIndex.documents.filter(item => item.id==docId)[0]
         }
     },
     methods: {

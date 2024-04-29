@@ -12,6 +12,7 @@ import sys
 import argparse
 from pathlib import Path
 import time
+import json
 
 from src.prepare_models import finetune
 from src.asr import run_workflow
@@ -23,6 +24,21 @@ from _constants import (
 )
 
 
+def get_next_batch(lst, batch_count):
+    """...."""
+    final_idx = int(len(lst)/batch_count-1)
+    index_list = list(range( final_idx + 1  ))
+    remainder = len(lst)%batch_count
+    for idx in index_list:
+        init = idx * batch_count
+        if remainder>0 and idx==final_idx:
+            batch = lst[init: (idx+1) * batch_count+remainder]
+        else:
+            batch = lst[init: (idx+1) * batch_count]
+        yield batch
+
+
+
 
 def main(args):
     """ Main entry point of the app. """
@@ -31,7 +47,11 @@ def main(args):
 
     try:
         INPUT_PATH = Path(args.input)
-        INTERMEDIATE_PATH = (INPUT_PATH / 'UNZIPPED').mkdir(parents=True, exist_ok=True)
+        INTERMEDIATE_PATH = INPUT_PATH / 'PROCESSED'
+        INTERMEDIATE_PATH.mkdir(parents=True, exist_ok=True)
+        OUTPUT_PATH = INPUT_PATH / 'OUTPUT'
+        OUTPUT_PATH.mkdir(parents=True, exist_ok=True)
+        BATCH_COUNT = int(args.batch_count)
     except:
         logger.info(f"End process, execution took: {round(time.time() - start_time, 3)}sec")
         sys.exit()
@@ -60,21 +80,28 @@ def main(args):
             target_extension=['.wav','.mp3']
             )
         sound_files_list.extend(extracted_sound_files)
+    sound_files_list = [file for file in sound_files_list if file!=None]
+    file_list_path = INTERMEDIATE_PATH / 'file_list.json'
+    string_sound_files_list = [str(file) for file in sound_files_list]
+    with open(file_list_path, 'w') as f:
+        json.dump(string_sound_files_list, f)
     logger.info(f'End ingest file location from {INPUT_PATH} with count of files: {len(sound_files_list)}')
 
-    #run workflow
+    #run workflow on batches
     logger.info("Begin workflow")
-    pdfs = run_workflow(
-        sound_files=sound_files_list, 
-        intermediate_save_dir=INTERMEDIATE_PATH
-        )
-    logger.info("End workflow")
+    for idx, batch in enumerate( get_next_batch(sound_files_list, BATCH_COUNT) ):
+        pdfs = run_workflow(
+            sound_files=batch, 
+            intermediate_save_dir=INTERMEDIATE_PATH
+            )
+        logger.info("End workflow")
 
-    #export
-    logger.info("Begin export")
-    check = utils.export_to_vdi_workspace(pdfs)
+        #export
+        logger.info("Begin export")
+        file_path = OUTPUT_PATH / f'VDI_ApplicationStateData_v0.2.1-{idx+1}.gz'
+        check = utils.export_to_vdi_workspace(pdfs, file_path)
+        logger.info(f"data processed for batch-{idx+1}: {check}")
 
-    logger.info(f"data processed: {check}")
     logger.info(f"End process, execution took: {round(time.time() - start_time, 3)}sec")
 
 
@@ -85,6 +112,7 @@ if __name__ == "__main__":
 
     # Required positional argument
     parser.add_argument("input", help="Required positional argument")
+    parser.add_argument("batch_count", help="Required positional argument")
 
     # Optional argument flag to prepare the models (defaults to False)
     parser.add_argument("-p", "--prepare_models", action="store_true", default=False)
