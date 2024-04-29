@@ -74,7 +74,7 @@ export default {
         async getApp() { return await document.getElementById('pdf-js-viewer').contentWindow.PDFViewerApplication },
         getDocument() {
             const docId = this.userContentStore.getSelectedDocument
-            return this.userContentStore.documentsIndex.documents.filter(item => item.id==docId)[0]
+            return this.userContentStore.documentsIndex.documents.filter(item => item.id==docId)[0]         //TODO:must use the Table array that is sorted on Score o/w incorrect
         }
     },
     methods: {

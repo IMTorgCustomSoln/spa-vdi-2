@@ -302,7 +302,7 @@ ready to be organized with the note Topics.`
 
                         //create array of snippts
                         if(positionGroups.length == 0){
-                            item.snippets.push([null,null])
+                            //item.snippets.push(null)          //TODO:this effects whether a snippet is displayed in Table!!!
                         }else{
                         for (let grp of positionGroups) {
                             const snippet = []
