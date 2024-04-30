@@ -14,7 +14,7 @@ pipenv run python main.py --version
 pipenv run python main.py samples/
 ```
 
-Review `logs/process.log` and obtain `result_output/VDI_ApplicationStateData_v0.2.1-XXX.gz` where `XXX` refers to the batch number.
+Review `logs/process.log` and obtain `samples/OUTPUT/VDI_ApplicationStateData_v0.2.1-XXX.gz` where `XXX` refers to the batch number.
 
 
 ## Dev & Test

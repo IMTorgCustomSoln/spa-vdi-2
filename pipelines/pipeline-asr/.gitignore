@@ -4,3 +4,5 @@
 #client/tests/data/profiles/
 pretrained_models/*
 runs/*
+samples/PROCESSED/
+samples/OUTPUT/

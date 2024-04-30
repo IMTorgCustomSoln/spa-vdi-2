@@ -4,6 +4,8 @@
 #client/tests/data/profiles/
 pipeline/pretrained_models/*
 pipeline/runs/*
+pipelines/pipeline-asr/samples/OUTPUT/
+pipelines/pipeline-asr/samples/PROCESSED/
 
 # Python Byte-compiled / optimized / DLL files
 __pycache__/

@@ -19,8 +19,8 @@ from collections import namedtuple
 emails_file = './config/emails.csv'
 email_network_drive = r'\\hqfiles01\sec_edgar$\cbdc_tracker'
 
-report_dir = './result_output'
-report_copy_dir = './result_output'
+#report_dir = './result_output'
+#report_copy_dir = './result_output'
 logging_dir = './logs/process.log'
 
 

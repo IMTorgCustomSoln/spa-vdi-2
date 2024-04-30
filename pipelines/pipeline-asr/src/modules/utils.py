@@ -172,16 +172,21 @@ def text_to_pdf(text):
     return pdf
 
 
+
+
+
+
 from pypdf import PdfReader
 import io
 import gzip
 import copy
 
-def export_to_vdi_workspace(pdfs, filepath):
+
+def get_schema_from_workspace(filepath):
     """..."""
 
     #get schema
-    filepath_original_wksp_gzip = Path('./tests/input/VDI_ApplicationStateData_v0.2.1.gz') 
+    filepath_original_wksp_gzip = Path(filepath)             #Path('./tests/input/VDI_ApplicationStateData_v0.2.1.gz') 
 
     with gzip.open(filepath_original_wksp_gzip, 'rb') as f_in:
         workspace_json = json.load(f_in)
@@ -192,7 +197,16 @@ def export_to_vdi_workspace(pdfs, filepath):
     for k,v in sample_item.items():
         sample_item[k] = None
     documents_schema = copy.deepcopy(sample_item)
-    #TODO:move^^^ to preparation functions
+    workspace_schema['documentsIndex']['indices']['lunrIndex'] = {}
+    workspace_schema['documentsIndex']['documents'] = documents_schema
+
+    return workspace_schema
+
+
+def export_to_vdi_workspace(workspace, pdfs, filepath):
+    """..."""
+    workspace_schema = copy.deepcopy(workspace)
+    documents_schema = workspace_schema['documentsIndex']['documents']
 
     #load documents
     documents = []
@@ -282,7 +296,7 @@ def export_to_vdi_workspace(pdfs, filepath):
 
     #compare
     workspace_schema['documentsIndex']['documents'] = documents
-    json.dumps(workspace_schema) == json.dumps(workspace_json)
+    #json.dumps(workspace_schema) == json.dumps(workspace_json)
     #list(workspace_json['documentsIndex']['documents'][0]['dataArray'].values())
     #list( pdf['byte_string'] )
 

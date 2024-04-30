@@ -47,17 +47,19 @@ def main(args):
 
     try:
         INPUT_PATH = Path(args.input)
+        #TODO:add UNZIPPED
         INTERMEDIATE_PATH = INPUT_PATH / 'PROCESSED'
-        INTERMEDIATE_PATH.mkdir(parents=True, exist_ok=True)
         OUTPUT_PATH = INPUT_PATH / 'OUTPUT'
-        OUTPUT_PATH.mkdir(parents=True, exist_ok=True)
         BATCH_COUNT = int(args.batch_count)
+        REGEX_INPUT_FILES_NAMES = '_Calls_'         #TODO:make argument
+
+        INTERMEDIATE_PATH.mkdir(parents=True, exist_ok=True)
+        OUTPUT_PATH.mkdir(parents=True, exist_ok=True)
     except:
         logger.info(f"End process, execution took: {round(time.time() - start_time, 3)}sec")
         sys.exit()
 
-
-    #prepare
+    #prepare models
     if args.prepare_models:
         logger.info("Begin prepare_models")
         check_prepare = finetune()
@@ -66,29 +68,43 @@ def main(args):
             exit()
         logger.info("End prepare_models")
 
-    #ingest
+    #prepare schema
+    filepath = Path('./tests/input/VDI_ApplicationStateData_v0.2.1.gz')
+    workspace_schema = utils.get_schema_from_workspace(filepath)
+
+    #prepare file list
     logger.info("Begin ingest file location")
-    zip_files = [INPUT_PATH / file for file 
-                 in os.listdir(INPUT_PATH) 
-                 #if file=='gettysburg.zip'
-                 #if '_Calls_' in file
-                 ]
-    sound_files_list = []
-    for file in zip_files:
-        extracted_sound_files = utils.get_decompressed_filepath(
-            filepath=file,
-            target_extension=['.wav','.mp3']
-            )
-        sound_files_list.extend(extracted_sound_files)
-    sound_files_list = [file for file in sound_files_list if file!=None]
     file_list_path = INTERMEDIATE_PATH / 'file_list.json'
-    string_sound_files_list = [str(file) for file in sound_files_list]
-    with open(file_list_path, 'w') as f:
-        json.dump(string_sound_files_list, f)
-    logger.info(f'End ingest file location from {INPUT_PATH} with count of files: {len(sound_files_list)}')
+    sound_files_list = None
+
+    if file_list_path.is_file():
+        logger.info(f"File {file_list_path} already exists.  Loading now... ")
+        with open(file_list_path, 'r') as f:
+            string_sound_files_list = json.load(f)
+        sound_files_list = [Path(file) for file in string_sound_files_list if Path(file).is_file()]
+    else:
+        logger.info(f"File {file_list_path} does NOT exist.")
+        zip_files = [INPUT_PATH / file for file 
+                     in os.listdir(INPUT_PATH) 
+                     #if file=='gettysburg.zip'
+                     #if REGEX_INPUT_FILES_NAMES in file
+                     ]
+        sound_files_list = []
+        for file in zip_files:
+            extracted_sound_files = utils.get_decompressed_filepath(
+                filepath=file,
+                target_extension=['.wav','.mp3']
+                )
+            sound_files_list.extend(extracted_sound_files)
+        sound_files_list = [file for file in sound_files_list if file!=None]
+    
+        string_sound_files_list = [str(file) for file in sound_files_list]
+        with open(file_list_path, 'w') as f:
+            json.dump(string_sound_files_list, f)
+        logger.info(f'End ingest file location from {INPUT_PATH} with count of files: {len(sound_files_list)}')
 
     #run workflow on batches
-    logger.info("Begin workflow")
+    logger.info("Begin workflow on each batch")
     for idx, batch in enumerate( get_next_batch(sound_files_list, BATCH_COUNT) ):
         pdfs = run_workflow(
             sound_files=batch, 
@@ -99,8 +115,8 @@ def main(args):
         #export
         logger.info("Begin export")
         file_path = OUTPUT_PATH / f'VDI_ApplicationStateData_v0.2.1-{idx+1}.gz'
-        check = utils.export_to_vdi_workspace(pdfs, file_path)
-        logger.info(f"data processed for batch-{idx+1}: {check}")
+        check = utils.export_to_vdi_workspace(workspace_schema, pdfs, file_path)
+        logger.info(f"Data processed for batch-{idx+1}: {check}")
 
     logger.info(f"End process, execution took: {round(time.time() - start_time, 3)}sec")
 

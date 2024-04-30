@@ -35,7 +35,15 @@ def finetune():
     with open(data_path / 'train.json', 'r') as file:
         train_records = json.load(file)['records']
     #train_dataset = load_dataset(records)         #<<<FAILS HERE, maybe use this: Dataset.from_dict(
-    train_dataset = Dataset.from_list(train_records)
+    with open(data_path / 'pos_sentence.txt', 'r') as file:
+        train_lines = file.readlines()
+    recs = [{'text':line.replace('\n',''), 'label':'positive'} for line in train_lines]
+    train_records.extend(recs)
+    with open(data_path / 'neg_sentence.txt', 'r') as file:
+        train_lines = file.readlines()
+    recs = [{'text':line.replace('\n',''), 'label':'negative'} for line in train_lines]
+    train_records.extend(recs)
+    train_dataset = Dataset.from_list(train_records[:10])
 
     with open(data_path / 'test.json', 'r') as file:
         test_records = json.load(file)['records']

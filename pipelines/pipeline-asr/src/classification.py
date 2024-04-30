@@ -4,6 +4,8 @@ Module Docstring
 
 """
 
+from pathlib import Path
+
 
 def classifier(chunk):
     """Importable function to run assigned models."""
@@ -21,7 +23,11 @@ def classifier(chunk):
 
 def kw_classifier(chunk):
     """..."""
-    KEYWORDS = ['ill', 'sick', 'unemployed', 'child']
+
+    data_path = Path('./src/data')
+    with open(data_path / 'pos_kw.txt', 'r') as file:
+        kw_lines = file.readlines()
+    KEYWORDS = kw_lines     #['ill', 'sick', 'unemployed', 'child']
 
     result = {
         'search': 'KW',

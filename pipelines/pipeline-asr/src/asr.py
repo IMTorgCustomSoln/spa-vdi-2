@@ -38,10 +38,21 @@ def run_workflow(sound_files, intermediate_save_dir=None):
     sound_files = sound_files       #[3:4] #fails
     """
 
-
     #prepare data
     from datasets import Dataset, Audio
     sound_filepath_strings = [str(file) for file in sound_files if file != None]
+
+    '''
+    #TODO:remove previously processed files
+    json_files = [json for json in os.listdir(intermediate_save_dir) if (('.json' in json) and (json != 'file_list.json'))]
+    previously_processed = [file for file in sound_filepath_strings if file in json_files]
+    processed_dialogues = []
+    for file in previously_processed:
+        with open(file, 'r') as f:
+            dialogue = json.load(f)
+            processed_dialogues.append(dialogue)
+    unprocessed = [file for file in sound_filepath_strings if file not in json_files]
+    '''
     audio_dataset = Dataset.from_dict({'audio': sound_filepath_strings}).cast_column('audio', Audio())
 
 
@@ -103,6 +114,8 @@ def run_workflow(sound_files, intermediate_save_dir=None):
             save_path = Path(intermediate_save_dir) / f'{dialogue["file_name"]}.json'
             with open(save_path, 'w') as f:
                 json.dump(dialogues, f)
+
+    #TODO:   dialogues.extend(processed_dialogues)   #combine records of previously processed dialogues 
 
 
     #format and output
