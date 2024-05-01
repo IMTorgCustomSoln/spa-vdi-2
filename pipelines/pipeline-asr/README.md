@@ -13,6 +13,8 @@ Prepare `.env` file with:
 
 Ensure dependencies are correct.  You may have to upgrade with the following: `pip install --upgrade s3fs fsspec`
 
+Change `src/asr.py` at `asr_pipeline = pipeline(...` to `whisper-large`.
+
 ```
 pipenv install
 ```

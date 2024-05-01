@@ -56,7 +56,7 @@ def finetune():
     from setfit import Trainer, TrainingArguments
 
     args = TrainingArguments(
-        batch_size=32,
+        batch_size=25,
         num_epochs=10,
     )
     trainer = Trainer(

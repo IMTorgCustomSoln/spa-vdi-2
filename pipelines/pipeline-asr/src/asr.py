@@ -62,7 +62,8 @@ def run_workflow(sound_files, intermediate_save_dir=None):
 
     asr_pipeline = pipeline(
         task='automatic-speech-recognition', 
-        model='openai/whisper-base'
+        model='openai/whisper-base',
+        language='en'
         )
     """
     sample = audio_dataset[0]['audio']
