@@ -5,7 +5,11 @@
 
 Expects a directory of either: i) compressed audio files or ii) single audio files.
 
-Prepare `.env` file with `HF_TOKEN` (account), `HF_HOME` (model files directory).
+Prepare `.env` file with:
+
+* `HF_TOKEN` - account
+* `HF_HOME` - model files directory
+* `CURL_CA_BUNDLE` 
 
 Ensure you are in directory `pipelines/pipeline-asr/`, then to use the provided audio `samples/`:
 
