@@ -103,16 +103,20 @@ def output_to_pdf(dialogue, filename=None, output_type='file'):
     timestamps = [line['timestamp'] for line in lines]
     stamps = [[-1,-1] for idx in range(len(timestamps))]
     trigger = False
-    for idx in range(len(timestamps)):
-        if idx==0:
-            stamps[0] = timestamps[0]
-        elif (timestamps[idx][0] == timestamps[idx-1][1]) and trigger==False:
-            stamps[idx]= timestamps[idx]
-        elif trigger==True:
-            stamps[idx] = [ (stamps[idx-1])[1], stamps[idx-1][1] + timestamps[idx][1] ]
-        else:
-            stamps[idx] = [ timestamps[idx-1][1], timestamps[idx-1][1] + timestamps[idx][1] ]
-            trigger = True
+    try:
+        for idx in range(len(timestamps)):
+            if idx==0:
+                stamps[0] = timestamps[0]
+            elif (timestamps[idx][0] == timestamps[idx-1][1]) and trigger==False:
+                stamps[idx]= timestamps[idx]
+            elif trigger==True:
+                stamps[idx] = [ (stamps[idx-1])[1], stamps[idx-1][1] + timestamps[idx][1] ]
+            else:
+                stamps[idx] = [ timestamps[idx-1][1], timestamps[idx-1][1] + timestamps[idx][1] ]
+                trigger = True
+    except Exception as e:
+        print(e)
+        return None
 
     for idx in range(len(timestamps)):
         item = f'{stamps[idx]}  -  {lines[idx]["text"]} \n'

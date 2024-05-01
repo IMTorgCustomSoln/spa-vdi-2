@@ -63,7 +63,7 @@ def run_workflow(sound_files, intermediate_save_dir=None):
     asr_pipeline = pipeline(
         task='automatic-speech-recognition', 
         model='openai/whisper-base',
-        language='en'
+        generate_kwargs={"language": "english"},
         )
     """
     sample = audio_dataset[0]['audio']
@@ -138,7 +138,8 @@ def run_workflow(sound_files, intermediate_save_dir=None):
             dialogue=dialogue,
             output_type='str'
         )
-        pdfs.append(pdf)
+        if pdf!=None:
+            pdfs.append(pdf)
 
     #TODO:change to zip file
     '''
