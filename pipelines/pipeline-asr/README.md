@@ -9,13 +9,20 @@ Prepare `.env` file with:
 
 * `HF_TOKEN` - account
 * `HF_HOME` - model files directory
-* `CURL_CA_BUNDLE` 
+* `CURL_CA_BUNDLE` - public key (.pem) cert
+
+Ensure dependencies are correct.  You may have to upgrade with the following: `pip install --upgrade s3fs fsspec`
+
+```
+pipenv install
+```
+
 
 Ensure you are in directory `pipelines/pipeline-asr/`, then to use the provided audio `samples/`:
 
 ```
 pipenv run python main.py --version
-pipenv run python main.py samples/
+pipenv run python main.py samples/ 4 --prepare_models
 ```
 
 Review `logs/process.log` and obtain `samples/OUTPUT/VDI_ApplicationStateData_v0.2.1-XXX.gz` where `XXX` refers to the batch number.

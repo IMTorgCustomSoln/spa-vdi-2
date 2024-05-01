@@ -86,7 +86,7 @@
                             <Guide v-bind="guides.snippet" />
                         </div>    
                             <div v-if="getSearchSnippets.length < 1" @click="selectSnippetPage(this.userContentStore.getSelectedDocument, '')">
-                                Select a document from the table.
+                                Select a document from the table or `PRESS` to view document pages.
                             </div>
                             <div v-else id="search-results" v-for="(snippet, index) in getSearchSnippets">
                                 <div class="snippet" @click="selectSnippetPage(index, snippet)">

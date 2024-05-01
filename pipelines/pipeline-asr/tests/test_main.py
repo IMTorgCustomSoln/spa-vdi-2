@@ -13,7 +13,7 @@ def test_main_batch_1():
     class Args:
         input=Path(os.getcwd()) / 'samples'
         batch_count=1
-        prepare_models = False
+        prepare_models=False
     args = Args()
     main(args)
 
@@ -31,7 +31,7 @@ def test_main_batch_4():
     class Args:
         input=Path(os.getcwd()) / 'samples'
         batch_count=4
-        prepare_models = False
+        prepare_models=False
     args = Args()
     main(args)
 

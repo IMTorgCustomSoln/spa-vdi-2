@@ -55,7 +55,8 @@ def main(args):
 
         INTERMEDIATE_PATH.mkdir(parents=True, exist_ok=True)
         OUTPUT_PATH.mkdir(parents=True, exist_ok=True)
-    except:
+    except Exception as e:
+        print(e)
         logger.info(f"End process, execution took: {round(time.time() - start_time, 3)}sec")
         sys.exit()
 

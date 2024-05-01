@@ -27,7 +27,7 @@ def kw_classifier(chunk):
     data_path = Path('./src/data')
     with open(data_path / 'pos_kw.txt', 'r') as file:
         kw_lines = file.readlines()
-    KEYWORDS = kw_lines     #['ill', 'sick', 'unemployed', 'child']
+    KEYWORDS = [word.replace('\n','') for word in kw_lines]
 
     result = {
         'search': 'KW',
@@ -35,11 +35,14 @@ def kw_classifier(chunk):
         'timestamp': None,
         'pred': None
         }
+    hits = []
     for word in KEYWORDS:
         if word in chunk['text']:
-            result['target'] = word
+            hits.append(word)
+    if len(hits)>0:
+            result['target'] = ' '.join(hits)
             result['timestamp'] = chunk['timestamp']
-            result['pred'] = 1.0
+            result['pred'] = len(hits) / len(chunk['text'])
             return result
     else:
         return None
@@ -66,11 +69,11 @@ def fs_classifier(chunk):
         }
     model_path = Path("pretrained_models/finetuned--BAAI")
     model = SetFitModel.from_pretrained(model_path)
-    probs = model.predict_proba(chunk['text'])
-    if probs[1] > .5:
-        result['target'] = chunk['text']
-        result['timestamp'] = chunk['timestamp']
-        result['pred'] = 1.0
-        return result
-    
+    if len(chunk['text']) > 40:
+        probs = model.predict_proba(chunk['text'])
+        if probs[1] > .85:
+            result['target'] = chunk['text']
+            result['timestamp'] = chunk['timestamp']
+            result['pred'] = probs[1]
+            return result
     return None
