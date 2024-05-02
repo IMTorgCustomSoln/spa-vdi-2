@@ -14,7 +14,7 @@ def test_entrypoint():
     assert exit_status == 0
 
 def test_prepare_files():
-    #exit_status = os.system('main.py prepare samples/ 4 -msf')
+    #exit_status = os.system('main.py prepare samples/ 4 -sf')
     class Args:
         task='prepare'
         input=Path(os.getcwd()) / 'samples'
@@ -27,7 +27,7 @@ def test_prepare_files():
     assert True == True
 
 def test_prepare_model():
-    #exit_status = os.system('main.py prepare samples/ 4 -msf')
+    #exit_status = os.system('main.py prepare samples/ 4 -m')
     class Args:
         task='prepare'
         input=Path(os.getcwd()) / 'samples'
@@ -38,6 +38,22 @@ def test_prepare_model():
     args = Args()
     main(args)
     assert True == True
+
+def test_infer_audio_files():
+    #exit_status = os.system('main.py infer samples/ 4 -m')
+    class Args:
+        task='infer'
+        input=Path(os.getcwd()) / 'samples'
+        batch_count=4
+        prepare_models=False
+        prepare_schema=False
+        prepare_file_list=False
+    args = Args()
+    main(args)
+    assert True == True
+
+
+
 
 def test_infer():
     #exit_status = os.system('main.py prepare samples/ 4 -msf')

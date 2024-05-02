@@ -62,6 +62,7 @@ def prepare(args, CONFIG):
                          in os.listdir(CONFIG['INPUT_PATH']) 
                          #if file=='gettysburg.zip'
                          #if REGEX_INPUT_FILES_NAMES in file
+                         #if '.zip' in str(file)
                          ]
             sound_files_list = []
             for file in zip_files:
@@ -80,44 +81,68 @@ def prepare(args, CONFIG):
     return True
 
 
-def infer():
+def infer(CONFIG):
     """Run batches through model pipelines to get intermediate files."""
+    #load sound files
+    file_list_path = CONFIG['INTERMEDIATE_PATH'] / 'file_list.json'
+    sound_files_list = None
+    with open(file_list_path, 'r') as f:
+        string_sound_files_list = json.load(f)
+    sound_files_list = [Path(file) for file in string_sound_files_list]    
+
     #run workflow on batches
     logger.info("Begin workflow on each batch")
-    for idx, batch in enumerate( utils.get_next_batch(sound_files_list, BATCH_COUNT) ):
-        pdfs = run_workflow(
+    batches = {}
+    for idx, batch in enumerate( utils.get_next_batch(sound_files_list, CONFIG['BATCH_COUNT']) ):
+        batch_files = [str(file) for file in batch]
+        batches[idx] = batch_files
+        check_batch = run_workflow(
             sound_files=batch, 
-            intermediate_save_dir=INTERMEDIATE_PATH
+            intermediate_save_dir=CONFIG['INTERMEDIATE_PATH']
             )
         logger.info("End workflow")
 
+        '''
         #export
         logger.info("Begin export")
-        file_path = OUTPUT_PATH / f'VDI_ApplicationStateData_v0.2.1-{idx+1}.gz'
+        file_path = CONFIG['OUTPUT_PATH'] / f'VDI_ApplicationStateData_v0.2.1-{idx+1}.gz'
         check = utils.export_to_vdi_workspace(workspace_schema, pdfs, file_path)
         logger.info(f"Data processed for batch-{idx+1}: {check}")
+        '''
+    batch_list_path = CONFIG['INTERMEDIATE_PATH'] / 'batch_list.json'
+    with open(batch_list_path, 'w') as f:
+        json.dump(batches, f)
+    return True
 
-    logger.info(f"End process, execution took: {round(time.time() - start_time, 3)}sec")
 
-
-def output():
+def output(CONFIG):
     """Output whatever current intermediate files exist."""
+    #json files
+    batch_list_path = CONFIG['INTERMEDIATE_PATH'] / 'batch_list.json'
+    with open(batch_list_path, 'r') as f:
+        batches = json.dump(f)
+
+    #workspace
+    schema = CONFIG['INTERMEDIATE_PATH'] / 'workspace_schema_v0.2.1.json'
+    with open(schema, 'r') as f:
+        workspace_schema = json.load(f)
+
     #run workflow on batches
     logger.info("Begin workflow on each batch")
-    for idx, batch in enumerate( utils.get_next_batch(sound_files_list, BATCH_COUNT) ):
-        pdfs = run_workflow(
-            sound_files=batch, 
-            intermediate_save_dir=INTERMEDIATE_PATH
-            )
-        logger.info("End workflow")
+    for idx, batch in batches.items():
+        dialogues = []
+        for file in batch:
+            file_path = CONFIG['INTERMEDIATE_PATH'] / f'{file}.json'
+            with open(file_path, 'r') as f:
+                dialogue = json.load(file)
+                dialogues.append(dialogue)
 
         #export
         logger.info("Begin export")
-        file_path = OUTPUT_PATH / f'VDI_ApplicationStateData_v0.2.1-{idx+1}.gz'
-        check = utils.export_to_vdi_workspace(workspace_schema, pdfs, file_path)
+        file_path = CONFIG['OUTPUT_PATH'] / f'VDI_ApplicationStateData_v0.2.1-{idx+1}.gz'
+        check = utils.export_to_vdi_workspace(workspace_schema, dialogues, file_path)
         logger.info(f"Data processed for batch-{idx+1}: {check}")
 
-    logger.info(f"End process, execution took: {round(time.time() - start_time, 3)}sec")
 
 
 def main(args):
@@ -138,18 +163,18 @@ def main(args):
         CONFIG['OUTPUT_PATH'].mkdir(parents=True, exist_ok=True)
     except Exception as e:
         print(e)
-        logger.info(f"End process, execution took: {round(time.time() - start_time, 3)}sec")
         sys.exit()
 
     if args.task == 'prepare':
         prepare(args, CONFIG)
-    elif CONFIG['TASK'] == 'infer':
+    elif args.task == 'infer':
         infer(CONFIG)
-    elif CONFIG['TASK'] == 'output':
+    elif args.task == 'output':
         output(CONFIG)
     else:
         pass
-    
+
+    logger.info(f"End process, execution took: {round(time.time() - start_time, 3)}sec")
     return True
 
 

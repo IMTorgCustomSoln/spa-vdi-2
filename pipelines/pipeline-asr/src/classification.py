@@ -4,6 +4,8 @@ Module Docstring
 
 """
 
+#TODO:from nltk.tokenize import word_tokenize 
+
 from pathlib import Path
 
 
@@ -39,6 +41,7 @@ def kw_classifier(chunk):
     for word in KEYWORDS:
         if word in chunk['text']:
             hits.append(word)
+    #words = word_tokenize(chunk['text'])
     if len(hits)>0:
             result['target'] = ' '.join(hits)
             result['timestamp'] = chunk['timestamp']
@@ -71,7 +74,8 @@ def fs_classifier(chunk):
     model = SetFitModel.from_pretrained(model_path)
     if len(chunk['text']) > 40:
         probs = model.predict_proba(chunk['text'])
-        if probs[1] > .85:
+        pos_idx = model.labels.index('positive')
+        if probs[pos_idx] > .85:
             result['target'] = chunk['text']
             result['timestamp'] = chunk['timestamp']
             result['pred'] = probs[1]

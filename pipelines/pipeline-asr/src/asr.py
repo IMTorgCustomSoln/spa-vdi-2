@@ -118,9 +118,10 @@ def run_workflow(sound_files, intermediate_save_dir=None):
                     json.dump(dialogue, f)
             except Exception as e:
                 print(e)
-    #TODO:   dialogues.extend(processed_dialogues)   #combine records of previously processed dialogues 
+    #TODO:   dialogues.extend(processed_dialogues)   #combine records of previously processed dialogues
+    return True 
 
-
+    """
     #format and output
     from src.modules import utils
 
@@ -155,3 +156,4 @@ def run_workflow(sound_files, intermediate_save_dir=None):
 
     
     return pdfs
+    """

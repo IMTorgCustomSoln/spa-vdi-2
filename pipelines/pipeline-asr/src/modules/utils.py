@@ -222,10 +222,20 @@ def get_schema_from_workspace(filepath):
     return workspace_schema
 
 
-def export_to_vdi_workspace(workspace, pdfs, filepath):
+def export_to_vdi_workspace(workspace, dialogues, filepath):
     """..."""
     workspace_schema = copy.deepcopy(workspace)
     documents_schema = workspace_schema['documentsIndex']['documents']
+
+    #to string
+    pdfs = []
+    for dialogue in dialogues:
+        pdf = output_to_pdf(
+            dialogue=dialogue,
+            output_type='str'
+        )
+        if pdf!=None:
+            pdfs.append(pdf)
 
     #load documents
     documents = []
