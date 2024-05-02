@@ -43,7 +43,7 @@ def finetune():
         train_lines = file.readlines()
     recs = [{'text':line.replace('\n',''), 'label':'negative'} for line in train_lines]
     train_records.extend(recs)
-    train_dataset = Dataset.from_list(train_records[:10])
+    train_dataset = Dataset.from_list(train_records)
 
     with open(data_path / 'test.json', 'r') as file:
         test_records = json.load(file)['records']

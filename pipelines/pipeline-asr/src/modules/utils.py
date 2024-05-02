@@ -18,6 +18,20 @@ def absoluteFilePaths(directory):
             yield Path( os.path.abspath(os.path.join(dirpath, f)) )
 
 
+def get_next_batch(lst, batch_count):
+    """...."""
+    final_idx = int(len(lst)/batch_count-1)
+    index_list = list(range( final_idx + 1  ))
+    remainder = len(lst)%batch_count
+    for idx in index_list:
+        init = idx * batch_count
+        if remainder>0 and idx==final_idx:
+            batch = lst[init: (idx+1) * batch_count+remainder]
+        else:
+            batch = lst[init: (idx+1) * batch_count]
+        yield batch
+
+
 def get_decompressed_filepath(filepath, target_extension=[]):
     """Return path of all decompressed files.
     
@@ -116,6 +130,7 @@ def output_to_pdf(dialogue, filename=None, output_type='file'):
                 trigger = True
     except Exception as e:
         print(e)
+        #TODO:Whisper did not predict an ending timestamp, which can happen if audio is cut off in the middle of a word.  Also make sure WhisperTimeStampLogitsProcessor was used during generation.
         return None
 
     for idx in range(len(timestamps)):

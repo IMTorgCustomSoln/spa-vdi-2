@@ -113,9 +113,11 @@ def run_workflow(sound_files, intermediate_save_dir=None):
     if intermediate_save_dir:
         for dialogue in dialogues:
             save_path = Path(intermediate_save_dir) / f'{dialogue["file_name"]}.json'
-            with open(save_path, 'w') as f:
-                json.dump(dialogue, f)
-
+            try:
+                with open(save_path, 'w') as f:
+                    json.dump(dialogue, f)
+            except Exception as e:
+                print(e)
     #TODO:   dialogues.extend(processed_dialogues)   #combine records of previously processed dialogues 
 
 

@@ -36,6 +36,7 @@ If using vscode, open in dev container and 'Add folder to workspace' > `pipeline
 
 ```
 pipenv run pytest --collect-only
+/home/node/.local/share/virtualenvs/pipeline-asr-WU7QSYkE/bin/pytest --collect-only
 ```
 
 
@@ -67,7 +68,13 @@ pipenv run pytest --collect-only
 * run
   - ~~via commandline from within workspace~~
   - ~~dirs: logs, output (dated)~~
-  - load from intermediate files
+  - separate preparation (finetune) from workflow
+  - load from intermediate files (.json)
+  - create Workspace from current output
+  - multiple audio files per zip
+  - convenience functions:
+    + 
+    + compare file_list.json???
 * models
   - ~~add batching to pipeline~~
   - integrate EnteroDoc
