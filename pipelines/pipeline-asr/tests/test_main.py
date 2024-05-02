@@ -40,6 +40,50 @@ def test_prepare_model():
     assert True == True
 
 def test_infer_audio_files():
+    #exit_status = os.system('main.py infer samples/ 4')
+    class Args:
+        task='infer'
+        input=Path(os.getcwd()) / 'samples'
+        batch_count=4
+        prepare_models=False
+        prepare_schema=False
+        prepare_file_list=False
+        text_classify_only=False
+    args = Args()
+    main(args)
+    assert True == True
+
+def test_infer_text_classification_on_intermediate():
+    #exit_status = os.system('main.py infer samples/ 4 -c')
+    class Args:
+        task='infer'
+        input=Path(os.getcwd()) / 'samples'
+        batch_count=4
+        prepare_models=False
+        prepare_schema=False
+        prepare_file_list=False
+        text_classify_only=True
+    args = Args()
+    main(args)
+    assert True == True
+
+def test_report_on_intermediate():
+    #exit_status = os.system('main.py infer samples/ 4 -c')
+    class Args:
+        task='report'
+        input=Path(os.getcwd()) / 'samples'
+        batch_count=4
+        prepare_models=False
+        prepare_schema=False
+        prepare_file_list=False
+        text_classify_only=False
+    args = Args()
+    main(args)
+    assert True == True
+
+
+def test_output_batch_files():
+    '''
     #exit_status = os.system('main.py infer samples/ 4 -m')
     class Args:
         task='infer'
@@ -49,24 +93,8 @@ def test_infer_audio_files():
         prepare_schema=False
         prepare_file_list=False
     args = Args()
-    main(args)
+    main(args)'''
     assert True == True
-
-
-
-
-def test_infer():
-    #exit_status = os.system('main.py prepare samples/ 4 -msf')
-    class Args:
-        task='infer'
-        input=Path(os.getcwd()) / 'samples'
-        batch_count=4
-    args = Args()
-    main(args)
-    assert True == True
-
-
-
 
 def test_main_batch_1():
     class Args:

@@ -75,9 +75,10 @@ def fs_classifier(chunk):
     if len(chunk['text']) > 40:
         probs = model.predict_proba(chunk['text'])
         pos_idx = model.labels.index('positive')
-        if probs[pos_idx] > .85:
+        prob_positive = probs.tolist()[pos_idx]
+        if prob_positive > .5:
             result['target'] = chunk['text']
             result['timestamp'] = chunk['timestamp']
-            result['pred'] = probs[1]
+            result['pred'] = prob_positive
             return result
     return None

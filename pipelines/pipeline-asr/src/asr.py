@@ -18,7 +18,7 @@ import json
 
 
 
-def run_workflow(sound_files, intermediate_save_dir=None):
+def run_workflow(args, CONFIG, sound_files, intermediate_save_dir=None):
     """..."""
 
     config_env.config()
@@ -53,43 +53,52 @@ def run_workflow(sound_files, intermediate_save_dir=None):
             processed_dialogues.append(dialogue)
     unprocessed = [file for file in sound_filepath_strings if file not in json_files]
     '''
-    audio_dataset = Dataset.from_dict({'audio': sound_filepath_strings}).cast_column('audio', Audio())
+    
 
+    if not args.text_classify_only:
+        #transcribe sample
+        from transformers import pipeline
+        from transformers.pipelines.pt_utils import KeyDataset
 
-    #transcribe sample
-    from transformers import pipeline
-    from transformers.pipelines.pt_utils import KeyDataset
+        audio_dataset = Dataset.from_dict({'audio': sound_filepath_strings}).cast_column('audio', Audio())
 
-    asr_pipeline = pipeline(
-        task='automatic-speech-recognition', 
-        model='openai/whisper-base',
-        generate_kwargs={"language": "english"},
-        )
-    """
-    sample = audio_dataset[0]['audio']
-    dialogues = asr_pipeline(
-        inputs=sample.copy(),
-        generate_kwargs={'max_new_tokens': 256},
-        return_timestamps=True
-        )
-    """
-    dialogues = []
-    gen = asr_pipeline(KeyDataset(audio_dataset, 'audio'), 
-                       #generate_kwargs={'max_new_tokens': 256}, 
-                       return_timestamps=True,
-                       chunk_length_s=30        #batch processing of single file, [ref](https://huggingface.co/blog/asr-chunking)
-                       )
-    for idx, file in enumerate( gen ):
-        file_path = audio_dataset[idx]['audio']['path']
-        file_name = os.path.basename( file_path )
-        sampling_rate = audio_dataset[idx]['audio']['sampling_rate']
-        record = {
-            'file_name': file_name,
-            'file_path': file_path, 
-            'sampling_rate': sampling_rate, 
-            'chunks': file['chunks']
-            }
-        dialogues.append(record)
+        asr_pipeline = pipeline(
+            task='automatic-speech-recognition', 
+            model='openai/whisper-base',
+            generate_kwargs={"language": "english"},
+            )
+        """
+        sample = audio_dataset[0]['audio']
+        dialogues = asr_pipeline(
+            inputs=sample.copy(),
+            generate_kwargs={'max_new_tokens': 256},
+            return_timestamps=True
+            )
+        """
+        dialogues = []
+        gen = asr_pipeline(KeyDataset(audio_dataset, 'audio'), 
+                           #generate_kwargs={'max_new_tokens': 256}, 
+                           return_timestamps=True,
+                           chunk_length_s=30        #batch processing of single file, [ref](https://huggingface.co/blog/asr-chunking)
+                           )
+        for idx, file in enumerate( gen ):
+            file_path = audio_dataset[idx]['audio']['path']
+            file_name = os.path.basename( file_path )
+            sampling_rate = audio_dataset[idx]['audio']['sampling_rate']
+            record = {
+                'file_name': file_name,
+                'file_path': file_path, 
+                'sampling_rate': sampling_rate, 
+                'chunks': file['chunks']
+                }
+            dialogues.append(record)
+    
+    else:
+        dialogues = []
+        for file in sound_files:
+            with open(file, 'r') as f:
+                dialogue = json.load(f)
+                dialogues.append(dialogue)
 
 
     #run classification models on each: chunk,item
@@ -103,23 +112,26 @@ def run_workflow(sound_files, intermediate_save_dir=None):
                 if result != None:
                     dialogues[idx]['classifier'].append(result)
                 else:
-                    dialogues[idx]['classifier'].append([])
+                    dialogues[idx]['classifier'].append({})
                
 
 
     #save
     from src.modules import utils
 
+    save_json_paths = []
     if intermediate_save_dir:
         for dialogue in dialogues:
             save_path = Path(intermediate_save_dir) / f'{dialogue["file_name"]}.json'
             try:
                 with open(save_path, 'w') as f:
                     json.dump(dialogue, f)
+                save_json_paths.append( str(save_path) )
             except Exception as e:
                 print(e)
-    #TODO:   dialogues.extend(processed_dialogues)   #combine records of previously processed dialogues
-    return True 
+            #TODO:   dialogues.extend(processed_dialogues)   #combine records of previously processed dialogues
+            
+    return save_json_paths
 
     """
     #format and output

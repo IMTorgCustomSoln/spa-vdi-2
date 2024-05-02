@@ -81,8 +81,11 @@ def prepare(args, CONFIG):
     return True
 
 
-def infer(CONFIG):
-    """Run batches through model pipelines to get intermediate files."""
+def infer(args, CONFIG):
+    """Run batches through model pipelines to get intermediate files.
+    
+    TODO: re-run text classification models on intermediate files
+    """
     #load sound files
     file_list_path = CONFIG['INTERMEDIATE_PATH'] / 'file_list.json'
     sound_files_list = None
@@ -90,31 +93,71 @@ def infer(CONFIG):
         string_sound_files_list = json.load(f)
     sound_files_list = [Path(file) for file in string_sound_files_list]    
 
-    #run workflow on batches
-    logger.info("Begin workflow on each batch")
-    batches = {}
-    for idx, batch in enumerate( utils.get_next_batch(sound_files_list, CONFIG['BATCH_COUNT']) ):
-        batch_files = [str(file) for file in batch]
-        batches[idx] = batch_files
-        check_batch = run_workflow(
-            sound_files=batch, 
-            intermediate_save_dir=CONFIG['INTERMEDIATE_PATH']
-            )
-        logger.info("End workflow")
+    if not args.text_classify_only:
+        #run workflow on batches
+        logger.info("Begin workflow on each batch")
+        batches = {}
+        for idx, batch in enumerate( utils.get_next_batch(sound_files_list, CONFIG['BATCH_COUNT']) ):
+            #batch_files = [str(file) for file in batch]
+            #batches[idx] = batch_files
+            batch_files = run_workflow(
+                args=args,
+                CONFIG=CONFIG,
+                sound_files=batch, 
+                intermediate_save_dir=CONFIG['INTERMEDIATE_PATH']
+                )
+            batches[idx] = batch_files
+            logger.info("End workflow")
 
-        '''
-        #export
-        logger.info("Begin export")
-        file_path = CONFIG['OUTPUT_PATH'] / f'VDI_ApplicationStateData_v0.2.1-{idx+1}.gz'
-        check = utils.export_to_vdi_workspace(workspace_schema, pdfs, file_path)
-        logger.info(f"Data processed for batch-{idx+1}: {check}")
-        '''
+            '''
+            #export
+            logger.info("Begin export")
+            file_path = CONFIG['OUTPUT_PATH'] / f'VDI_ApplicationStateData_v0.2.1-{idx+1}.gz'
+            check = utils.export_to_vdi_workspace(workspace_schema, pdfs, file_path)
+            logger.info(f"Data processed for batch-{idx+1}: {check}")
+            '''
+    else:
+        batch_list_path = CONFIG['INTERMEDIATE_PATH'] / 'batch_list.json'
+        with open(batch_list_path, 'r') as f:
+            batches = json.load(f)
+        for idx, batch in batches.items():
+            batch_files = run_workflow(
+                args=args,
+                CONFIG=CONFIG,
+                sound_files=batch, 
+                intermediate_save_dir=CONFIG['INTERMEDIATE_PATH']
+                )
+            batches[idx] = batch_files
+            logger.info("End workflow")
+
     batch_list_path = CONFIG['INTERMEDIATE_PATH'] / 'batch_list.json'
     with open(batch_list_path, 'w') as f:
         json.dump(batches, f)
     return True
 
 
+def report(args, CONFIG):
+    """Save text classification hits to DataFrame csv."""
+    import pandas as pd
+
+    batch_list_path = CONFIG['INTERMEDIATE_PATH'] / 'batch_list.json'
+    with open(batch_list_path, 'r') as f:
+        batches = json.load(f)
+    intermediate_files = []
+    for idx,lst in batches.items():
+        for file in lst:
+            with open(file, 'r') as f:
+                dialogue = json.load(f)
+                for hit in dialogue['classifier']:
+                    if hit != []:
+                        hit['file_name'] = file
+                        intermediate_files.append(hit)
+    df = pd.DataFrame(intermediate_files)
+    df_path = CONFIG['INTERMEDIATE_PATH'] / 'hit_list.csv'
+    df.to_csv(df_path, index=False)
+
+    return True
+                
 def output(CONFIG):
     """Output whatever current intermediate files exist."""
     #json files
@@ -154,6 +197,7 @@ def main(args):
     try:
         CONFIG['INPUT_PATH'] = Path(args.input)
         #TODO:add UNZIPPED
+        #TODO:add loaded models
         CONFIG['INTERMEDIATE_PATH'] = CONFIG['INPUT_PATH'] / 'PROCESSED'
         CONFIG['OUTPUT_PATH'] = CONFIG['INPUT_PATH'] / 'OUTPUT'
         CONFIG['BATCH_COUNT'] = int(args.batch_count)
@@ -168,7 +212,9 @@ def main(args):
     if args.task == 'prepare':
         prepare(args, CONFIG)
     elif args.task == 'infer':
-        infer(CONFIG)
+        infer(args, CONFIG)
+    elif args.task == 'report':
+        report(args, CONFIG)
     elif args.task == 'output':
         output(CONFIG)
     else:
@@ -202,6 +248,7 @@ if __name__ == "__main__":
     parser.add_argument("-m", "--prepare_models", action="store_true", default=False)
     parser.add_argument("-s", "--prepare_schema", action="store_true", default=False)
     parser.add_argument("-f", "--prepare_file_list", action="store_true", default=False)
+    parser.add_argument("-c", "--text_classify_only", action="store_true", default=False)
 
     # Specify output of "--version"
     parser.add_argument(
