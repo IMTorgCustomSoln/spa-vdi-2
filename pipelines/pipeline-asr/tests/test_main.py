@@ -68,7 +68,7 @@ def test_infer_text_classification_on_intermediate():
     assert True == True
 
 def test_report_on_intermediate():
-    #exit_status = os.system('main.py infer samples/ 4 -c')
+    #exit_status = os.system('main.py report samples/ 4')
     class Args:
         task='report'
         input=Path(os.getcwd()) / 'samples'

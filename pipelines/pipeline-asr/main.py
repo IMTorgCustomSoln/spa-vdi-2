@@ -234,7 +234,7 @@ if __name__ == "__main__":
 
     # Required (or with default) positional argument
     parser.add_argument("task", 
-                        choices=['prepare', 'infer', 'output'],
+                        choices=['prepare', 'infer', 'report', 'output'],
                         help="Required positional argument")
     
     #if parser.parse_args().task in ['infer', 'output']:
