@@ -15,6 +15,12 @@ def test_entrypoint():
 
 def test_prepare_files():
     #exit_status = os.system('main.py prepare samples/ 4 -sf')
+    """
+    Scenario:
+    * prepare workspace_schema.json from client export
+    * prepare `file_list.json` with list of all audio files found in all decompressed .zip files (now each is a directory)
+    * run>>>  `python main.py prepare samples/ 4 -sf`
+    """
     class Args:
         task='prepare'
         input=Path(os.getcwd()) / 'samples'
@@ -27,7 +33,11 @@ def test_prepare_files():
     assert True == True
 
 def test_prepare_model():
-    #exit_status = os.system('main.py prepare samples/ 4 -m')
+    """
+    Scenario:
+    * prepare models by finetuning on train/test data
+    * run>>>  `python main.py prepare samples/ 4 -m`
+    """
     class Args:
         task='prepare'
         input=Path(os.getcwd()) / 'samples'
@@ -40,34 +50,61 @@ def test_prepare_model():
     assert True == True
 
 def test_infer_audio_files():
-    #exit_status = os.system('main.py infer samples/ 4')
+    """
+    Scenario:
+    * ran `python main.py prepare samples/ 4 -sfm`
+    * all .zip files decompressed and audio files listed in `file_list.json`
+    * ready to apply pipeline inference to make intermediate files
+    * run>>> `python main.py infer samples/ 4`
+    """
     class Args:
         task='infer'
         input=Path(os.getcwd()) / 'samples'
         batch_count=4
-        prepare_models=False
-        prepare_schema=False
-        prepare_file_list=False
-        text_classify_only=False
+        infer_text_classify_only=False
+        infer_from_remaining_list=False
     args = Args()
     main(args)
     assert True == True
 
-def test_infer_text_classification_on_intermediate():
-    #exit_status = os.system('main.py infer samples/ 4 -c')
+def test_reinfer_remaining_audio_files():
+    """
+    Scenario:
+    * ran `python main.py infer samples/ 4`
+    * process failed with no `batch_list.json`
+    * create `remaining_list.json` with `python main.py report samples/ 4 --report_process_status`
+    * run>>> `python main.py infer samples/ 4 --infer_from_remaining_list`
+    """
     class Args:
         task='infer'
         input=Path(os.getcwd()) / 'samples'
         batch_count=4
-        prepare_models=False
-        prepare_schema=False
-        prepare_file_list=False
-        text_classify_only=True
+        infer_text_classify_only=False
+        infer_from_remaining_list=True
     args = Args()
     main(args)
     assert True == True
 
-def test_report_on_intermediate():
+def test_reinfer_text_classification_on_intermediate():
+    """
+    Scenario:
+    * ran `python main.py infer samples/ 4`
+    * process complete with `batch_list.json`
+    * models are retrained with `python main.py prepare samples/ 4 --prepare_model`
+    * do not perform audio transcription, but overwrite `dialogue['classifier]`
+    * run>>> `python main.py infer samples/ 4 --infer_text_classify_only`
+    """
+    class Args:
+        task='infer'
+        input=Path(os.getcwd()) / 'samples'
+        batch_count=4
+        infer_text_classify_only=True
+        infer_from_remaining_list=False
+    args = Args()
+    main(args)
+    assert True == True
+
+def test_report_on_intermediate_classify_results():
     #exit_status = os.system('main.py report samples/ 4')
     class Args:
         task='report'
@@ -76,10 +113,35 @@ def test_report_on_intermediate():
         prepare_models=False
         prepare_schema=False
         prepare_file_list=False
-        text_classify_only=False
+        infer_text_classify_only=False
+        report_process_status=False
+        report_text_classify=True
     args = Args()
     main(args)
     assert True == True
+
+def test_report_on_remaining_audio_files():
+    #exit_status = os.system('main.py report samples/ 4')
+    class Args:
+        task='report'
+        input=Path(os.getcwd()) / 'samples'
+        batch_count=4
+        prepare_models=False
+        prepare_schema=False
+        prepare_file_list=False
+        infer_text_classify_only=False
+        report_process_status=True
+        report_text_classify=False
+    args = Args()
+    main(args)
+    assert True == True
+
+
+
+
+
+
+
 
 
 def test_output_batch_files():

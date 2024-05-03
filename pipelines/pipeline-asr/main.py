@@ -93,7 +93,7 @@ def infer(args, CONFIG):
         string_sound_files_list = json.load(f)
     sound_files_list = [Path(file) for file in string_sound_files_list]    
 
-    if not args.text_classify_only:
+    if not args.infer_text_classify_only:
         #run workflow on batches
         logger.info("Begin workflow on each batch")
         batches = {}
@@ -140,24 +140,60 @@ def report(args, CONFIG):
     """Save text classification hits to DataFrame csv."""
     import pandas as pd
 
-    batch_list_path = CONFIG['INTERMEDIATE_PATH'] / 'batch_list.json'
-    with open(batch_list_path, 'r') as f:
-        batches = json.load(f)
-    intermediate_files = []
-    for idx,lst in batches.items():
-        for file in lst:
-            with open(file, 'r') as f:
-                dialogue = json.load(f)
-                for hit in dialogue['classifier']:
-                    if hit != []:
-                        hit['file_name'] = file
-                        intermediate_files.append(hit)
-    df = pd.DataFrame(intermediate_files)
-    df_path = CONFIG['INTERMEDIATE_PATH'] / 'hit_list.csv'
-    df.to_csv(df_path, index=False)
+    #get all files
+    file_list_path = CONFIG['INTERMEDIATE_PATH'] / 'file_list.json'
+    if file_list_path.is_file():
+        with open(file_list_path, 'r') as f:
+            audio_files = json.load(f)
 
-    return True
-                
+    #get processed files 
+    batch_list_path = CONFIG['INTERMEDIATE_PATH'] / 'batch_list.json'
+    if batch_list_path.is_file():
+        with open(batch_list_path, 'r') as f:
+            batches = json.load(f)
+    else:
+        batches = {}
+        batches['0'] = [Path(file) for file in os.listdir(CONFIG['INTERMEDIATE_PATH']) 
+         if ('_list' not in file
+             and '_schema' not in file
+             and '.json' in file
+         )]
+    
+    if args.report_process_status:
+        #get list of unprocessed files
+        s_batches = set()
+        for k,v in batches.items():
+            [s_batches.add( Path(file).name.replace('.json','') ) for file in v]
+        s_audio_files = set()
+        [s_audio_files.add( Path(file).name ) for file in audio_files]
+        remaining_audio_files = list( s_audio_files.difference(s_batches) )
+        remaining_path = CONFIG['INTERMEDIATE_PATH'] / 'remaining_list.json'
+        with open(remaining_path, 'w') as f:
+            json.dump(remaining_audio_files, f)
+        return True
+    
+    if args.report_text_classify:
+        intermediate_files = []
+        for idx,lst in batches.items():
+            for file in lst:
+                p_file = Path(file)
+                if p_file.is_file():
+                    with open(file, 'r') as f:
+                        dialogue = json.load(f)
+                        for hit in dialogue['classifier']:
+                            if hit != []:
+                                hit['file_name'] = file
+                                intermediate_files.append(hit)
+                else:
+                    logger.info(f"File not found: {str(p_file)}")
+        df = pd.DataFrame(intermediate_files)
+        df_path = CONFIG['INTERMEDIATE_PATH'] / 'hit_list.csv'
+        df.to_csv(df_path, index=False)
+        return True
+    
+    return False
+
+
 def output(CONFIG):
     """Output whatever current intermediate files exist."""
     #json files
@@ -243,12 +279,20 @@ if __name__ == "__main__":
     parser.add_argument("batch_count", 
                         help="Required positional argument")
 
-    # Optional argument flag to prepare the models (defaults to False)
+    #prepare
     #if parser.parse_args().task=='prepare':
     parser.add_argument("-m", "--prepare_models", action="store_true", default=False)
     parser.add_argument("-s", "--prepare_schema", action="store_true", default=False)
     parser.add_argument("-f", "--prepare_file_list", action="store_true", default=False)
-    parser.add_argument("-c", "--text_classify_only", action="store_true", default=False)
+
+    #infer options
+    parser.add_argument("-c", "--infer_text_classify_only", action="store_true", default=False)
+    parser.add_argument("-r", "--infer_from_remaining_list", action="store_true", default=False)
+
+    #report options
+    parser.add_argument("-p", "--report_process_status", action="store_true", default=False)
+    parser.add_argument("-t", "--report_text_classify", action="store_true", default=False)
+
 
     # Specify output of "--version"
     parser.add_argument(

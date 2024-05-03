@@ -55,7 +55,7 @@ def run_workflow(args, CONFIG, sound_files, intermediate_save_dir=None):
     '''
     
 
-    if not args.text_classify_only:
+    if not args.infer_text_classify_only:
         #transcribe sample
         from transformers import pipeline
         from transformers.pipelines.pt_utils import KeyDataset
