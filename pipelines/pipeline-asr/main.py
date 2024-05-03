@@ -86,7 +86,14 @@ def infer(args, CONFIG):
     
     TODO: re-run text classification models on intermediate files
     """
+    batch_list_path = CONFIG['INTERMEDIATE_PATH'] / 'batch_list.json'
+    if batch_list_path.is_file():
+        with open(batch_list_path, 'r') as f:
+            batches = json.load(f)
+    else:
+        batches = {}
     sound_files_list = []
+
     if not args.infer_from_remaining_list:
         #load sound files
         file_list_path = CONFIG['INTERMEDIATE_PATH'] / 'file_list.json'
@@ -99,10 +106,9 @@ def infer(args, CONFIG):
             string_sound_files_list = json.load(f)
         sound_files_list = [Path(file) for file in string_sound_files_list]
 
+    #run complete workflow on batches
     if not args.infer_text_classify_only:
-        #run workflow on batches
         logger.info("Begin workflow on each batch")
-        batches = {}
         for idx, batch in enumerate( utils.get_next_batch(sound_files_list, CONFIG['BATCH_COUNT']) ):
             #batch_files = [str(file) for file in batch]
             #batches[idx] = batch_files
@@ -112,7 +118,8 @@ def infer(args, CONFIG):
                 sound_files=batch, 
                 intermediate_save_dir=CONFIG['INTERMEDIATE_PATH']
                 )
-            batches[idx] = batch_files
+            keys = len(batches.keys())
+            batches[keys+idx] = batch_files
             logger.info("End workflow")
 
             '''
@@ -122,10 +129,9 @@ def infer(args, CONFIG):
             check = utils.export_to_vdi_workspace(workspace_schema, pdfs, file_path)
             logger.info(f"Data processed for batch-{idx+1}: {check}")
             '''
+
+    #run only text classification piece of workflow
     else:
-        batch_list_path = CONFIG['INTERMEDIATE_PATH'] / 'batch_list.json'
-        with open(batch_list_path, 'r') as f:
-            batches = json.load(f)
         for idx, batch in batches.items():
             batch_files = run_workflow(
                 args=args,
@@ -133,17 +139,20 @@ def infer(args, CONFIG):
                 sound_files=batch, 
                 intermediate_save_dir=CONFIG['INTERMEDIATE_PATH']
                 )
-            batches[idx] = batch_files
+            batches[keys+idx] = batch_files
             logger.info("End workflow")
 
-    batch_list_path = CONFIG['INTERMEDIATE_PATH'] / 'batch_list.json'
     with open(batch_list_path, 'w') as f:
         json.dump(batches, f)
     return True
 
 
 def report(args, CONFIG):
-    """Save text classification hits to DataFrame csv."""
+    """Reports and indexes needed for correct processing
+
+    * check / update `batch_list.json`
+    * save list of unprocessed audio files
+    * save text classification hits to DataFrame csv."""
     import pandas as pd
 
     #get all files
@@ -152,18 +161,37 @@ def report(args, CONFIG):
         with open(file_list_path, 'r') as f:
             audio_files = json.load(f)
 
-    #get processed files 
+    #get currently processed files 
     batch_list_path = CONFIG['INTERMEDIATE_PATH'] / 'batch_list.json'
     if batch_list_path.is_file():
         with open(batch_list_path, 'r') as f:
-            batches = json.load(f)
+            batches_from_batch_list = json.load(f)
+
+    batches_from_file_dir = {}
+    batches_from_file_dir['0'] = [Path(file).resolve() for file in os.listdir(CONFIG['INTERMEDIATE_PATH']) 
+                                  if ('_list' not in file
+                                      and '_schema' not in file
+                                      and '.json' in file
+                                      )]
+    
+    #update batch_list.json if corrupt
+    if 'batches_from_batch_list' in locals():
+        if list(batches_from_file_dir.values()) != list(batches_from_batch_list.values()):
+            batches = batches_from_file_dir
+            s_batches = {}
+            for idx, file_list in batches_from_file_dir.items():
+                s_batches[idx] = [str(file) for file in file_list]
+            with open(batch_list_path, 'w') as f:
+                json.dump(s_batches, f)
+        else:
+            batches = batches_from_batch_list
     else:
-        batches = {}
-        batches['0'] = [Path(file) for file in os.listdir(CONFIG['INTERMEDIATE_PATH']) 
-         if ('_list' not in file
-             and '_schema' not in file
-             and '.json' in file
-         )]
+        batches = batches_from_file_dir
+        s_batches = {}
+        for idx, file_list in batches_from_file_dir.items():
+            s_batches[idx] = [str(file) for file in file_list]
+        with open(batch_list_path, 'w') as f:
+            json.dump(s_batches, f)
     
     #get list of unprocessed files
     if args.report_process_status:

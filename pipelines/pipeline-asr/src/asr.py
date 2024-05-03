@@ -67,6 +67,7 @@ def run_workflow(args, CONFIG, sound_files, intermediate_save_dir=None):
             model='openai/whisper-base',
             generate_kwargs={"language": "english"},
             )
+        #TODO: Whisper did not predict an ending timestamp,[ref](https://github.com/huggingface/transformers/issues/23231)
         """
         sample = audio_dataset[0]['audio']
         dialogues = asr_pipeline(

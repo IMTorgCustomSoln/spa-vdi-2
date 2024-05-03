@@ -102,6 +102,12 @@ def get_decompressed_filepath(filepath, target_extension=[]):
     return result
 
 
+def format_dialogue_timestamps(dialogue):
+    """..."""
+    mod_dialogue = dialogue
+    return mod_dialogue
+
+
 def output_to_pdf(dialogue, filename=None, output_type='file'):
     """Transform output and convert to PDF.
     file_path = Path('./output.json')
@@ -230,8 +236,9 @@ def export_to_vdi_workspace(workspace, dialogues, filepath):
     #to string
     pdfs = []
     for dialogue in dialogues:
+        mod_dialogue = format_dialogue_timestamps(dialogue)
         pdf = output_to_pdf(
-            dialogue=dialogue,
+            dialogue=mod_dialogue,
             output_type='str'
         )
         if pdf!=None:
