@@ -104,6 +104,7 @@ def get_decompressed_filepath(filepath, target_extension=[]):
 
 def format_dialogue_timestamps(dialogue):
     """..."""
+    #TODO: test this from separating code from `output_to_pdf()`, below
     mod_dialogue = dialogue
     return mod_dialogue
 

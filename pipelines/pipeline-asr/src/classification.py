@@ -43,7 +43,7 @@ def kw_classifier(chunk):
             hits.append(word)
     #words = word_tokenize(chunk['text'])
     if len(hits)>0:
-            result['target'] = ' '.join(hits)
+            result['target'] = ' '.join(hits)       #TODO: provide formatted chunk['text']
             result['timestamp'] = chunk['timestamp']
             result['pred'] = len(hits) / len(chunk['text'])
             return result
