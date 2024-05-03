@@ -86,12 +86,18 @@ def infer(args, CONFIG):
     
     TODO: re-run text classification models on intermediate files
     """
-    #load sound files
-    file_list_path = CONFIG['INTERMEDIATE_PATH'] / 'file_list.json'
-    sound_files_list = None
-    with open(file_list_path, 'r') as f:
-        string_sound_files_list = json.load(f)
-    sound_files_list = [Path(file) for file in string_sound_files_list]    
+    sound_files_list = []
+    if not args.infer_from_remaining_list:
+        #load sound files
+        file_list_path = CONFIG['INTERMEDIATE_PATH'] / 'file_list.json'
+        with open(file_list_path, 'r') as f:
+            string_sound_files_list = json.load(f)
+        sound_files_list = [Path(file) for file in string_sound_files_list]
+    else:
+        remaining_list_path = CONFIG['INTERMEDIATE_PATH'] / 'remaining_list.json'
+        with open(remaining_list_path, 'r') as f:
+            string_sound_files_list = json.load(f)
+        sound_files_list = [Path(file) for file in string_sound_files_list]
 
     if not args.infer_text_classify_only:
         #run workflow on batches
@@ -159,17 +165,22 @@ def report(args, CONFIG):
              and '.json' in file
          )]
     
+    #get list of unprocessed files
     if args.report_process_status:
-        #get list of unprocessed files
         s_batches = set()
         for k,v in batches.items():
             [s_batches.add( Path(file).name.replace('.json','') ) for file in v]
         s_audio_files = set()
         [s_audio_files.add( Path(file).name ) for file in audio_files]
         remaining_audio_files = list( s_audio_files.difference(s_batches) )
+        remaining_audio_files_list = []
+        for file in audio_files:
+            p_name = Path(file).name
+            if p_name in remaining_audio_files:
+                remaining_audio_files_list.append(file)
         remaining_path = CONFIG['INTERMEDIATE_PATH'] / 'remaining_list.json'
         with open(remaining_path, 'w') as f:
-            json.dump(remaining_audio_files, f)
+            json.dump(remaining_audio_files_list, f)
         return True
     
     if args.report_text_classify:

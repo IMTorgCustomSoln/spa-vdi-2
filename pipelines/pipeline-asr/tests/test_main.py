@@ -14,7 +14,6 @@ def test_entrypoint():
     assert exit_status == 0
 
 def test_prepare_files():
-    #exit_status = os.system('main.py prepare samples/ 4 -sf')
     """
     Scenario:
     * prepare workspace_schema.json from client export
@@ -105,7 +104,12 @@ def test_reinfer_text_classification_on_intermediate():
     assert True == True
 
 def test_report_on_intermediate_classify_results():
-    #exit_status = os.system('main.py report samples/ 4')
+    """
+    Scenario:
+    * ran `python main.py infer samples/ 4`
+    * need to review `hit_list.csv` text classification model results
+    * run>>> `python main.py report samples/ 4 --report_text_classify`
+    """
     class Args:
         task='report'
         input=Path(os.getcwd()) / 'samples'
@@ -121,7 +125,11 @@ def test_report_on_intermediate_classify_results():
     assert True == True
 
 def test_report_on_remaining_audio_files():
-    #exit_status = os.system('main.py report samples/ 4')
+    """
+    Scenario:
+    * need `remaining_list.json` of unprocessed audio files
+    * run>>> `python main.py report samples/ 4 --report_process_status`
+    """
     class Args:
         task='report'
         input=Path(os.getcwd()) / 'samples'
