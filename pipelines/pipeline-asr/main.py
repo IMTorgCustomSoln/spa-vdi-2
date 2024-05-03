@@ -168,10 +168,10 @@ def report(args, CONFIG):
             batches_from_batch_list = json.load(f)
 
     batches_from_file_dir = {}
-    batches_from_file_dir['0'] = [Path(file).resolve() for file in os.listdir(CONFIG['INTERMEDIATE_PATH']) 
-                                  if ('_list' not in file
-                                      and '_schema' not in file
-                                      and '.json' in file
+    batches_from_file_dir['0'] = [file.resolve() for file in CONFIG['INTERMEDIATE_PATH'].glob('**/*')
+                                  if ('_list' not in file.name
+                                      and '_schema' not in file.name
+                                      and '.json' in file.name
                                       )]
     
     #update batch_list.json if corrupt
