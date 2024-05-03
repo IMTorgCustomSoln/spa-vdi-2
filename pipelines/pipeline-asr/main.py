@@ -225,7 +225,8 @@ def report(args, CONFIG):
                                 intermediate_files.append(hit)
                 else:
                     logger.info(f"File not found: {str(p_file)}")
-        df = pd.DataFrame(intermediate_files)
+        raw = pd.DataFrame(intermediate_files)
+        df = raw[pd.isna(raw['pred'])==False]
         df_path = CONFIG['INTERMEDIATE_PATH'] / 'hit_list.csv'
         df.to_csv(df_path, index=False)
         return True
