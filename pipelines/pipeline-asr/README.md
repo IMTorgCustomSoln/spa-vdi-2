@@ -16,18 +16,29 @@ Ensure dependencies are correct.  You may have to upgrade with the following: `p
 Change `src/asr.py` at `asr_pipeline = pipeline(...` to `whisper-large`.
 
 ```
-pipenv install
+$ pipenv install
 ```
 
 
 Ensure you are in directory `pipelines/pipeline-asr/`, then to use the provided audio `samples/`:
 
 ```
-pipenv run python main.py --version
-pipenv run python main.py samples/ 4 --prepare_models
+$ pipenv run python main.py --version
+$ pipenv run python main.py samples/ 4 --prepare_models
 ```
 
 Review `logs/process.log` and obtain `samples/OUTPUT/VDI_ApplicationStateData_v0.2.1-XXX.gz` where `XXX` refers to the batch number.
+
+You may also want to run in the background with `nohup`.  To do this:
+
+```bash
+$ nohup python main.py infer samples/ 4 --infer_from_remaining_list; echo 'Job finished at:' $(date); &
+```
+
+Then, review running jobs with: `$ jobs`
+
+
+
 
 
 ## Dev & Test

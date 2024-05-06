@@ -24,4 +24,8 @@ def test_format_dialogue():
         ],
     }
     mod_dialogue = utils.format_dialogue_timestamps(dialogue)
-    assert True == True
+    assert mod_dialogue == [
+        '(0.0, 6.0)  -   Mr. Quilter is the apostle of the middle classes, and we are glad to welcome his gospel. \n', 
+        "(6.0, 11.0)  -   Nor is Mr. Quilter's manner less interesting than his matter. \n", 
+        "(11.0, None)  -   Nor is Mr. Quilter's \n"
+        ]

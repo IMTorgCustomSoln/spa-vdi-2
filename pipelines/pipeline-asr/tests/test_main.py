@@ -144,27 +144,28 @@ def test_report_on_remaining_audio_files():
     main(args)
     assert True == True
 
-
-
-
-
-
-
-
-
 def test_output_batch_files():
-    '''
-    #exit_status = os.system('main.py infer samples/ 4 -m')
+    """
+    Scenario:
+    * need `batch_list.json` of processed audio files
+    * run>>> `python main.py output samples/ 4`
+    """
     class Args:
-        task='infer'
+        task='output'
         input=Path(os.getcwd()) / 'samples'
         batch_count=4
-        prepare_models=False
-        prepare_schema=False
-        prepare_file_list=False
     args = Args()
-    main(args)'''
+    main(args)
     assert True == True
+
+
+
+
+
+
+
+
+
 
 def test_main_batch_1():
     class Args:

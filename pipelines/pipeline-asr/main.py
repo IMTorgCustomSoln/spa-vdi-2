@@ -13,6 +13,7 @@ import argparse
 from pathlib import Path
 import time
 import json
+from datetime import datetime
 
 from src.prepare_models import finetune
 from src.asr import run_workflow
@@ -20,6 +21,7 @@ from src.modules import utils
 
 sys.path.append(Path('config').absolute().as_posix() )
 from _constants import (
+    logging_dir,
     logger
 )
 
@@ -193,6 +195,31 @@ def report(args, CONFIG):
         with open(batch_list_path, 'w') as f:
             json.dump(s_batches, f)
     
+    #get results of previous run
+    if 'batches_from_batch_list' in locals():
+        files_processed_current_run = len( list(batches_from_batch_list.values()) )
+        CONFIG['LOGGER'].info(f'count of currently run files is: {files_processed_current_run} ')
+        with open(Path(logging_dir), 'r') as f:
+            log_file = f.readlines()
+        log_file.reverse()
+        l_comments = list(map(lambda x: x.split(']')[1].strip(), log_file))
+        last_indices = [idx for idx, item in enumerate(l_comments) if 'End workflow' in item]
+        last_idx = last_indices[0] if len(last_indices)>1 else None
+        if last_idx:
+            first_idx = [idx for idx, item in enumerate(l_comments[last_idx:]) if 'Begin process' in item][0]
+            last_datetime = datetime.strptime(
+                '20'+log_file[last_idx].split('[I ')[1].split(' main')[0],
+                '%Y%m%d %H:%M:%S'
+                )
+            first_datetime = datetime.strptime(
+                '20'+log_file[last_idx+first_idx].split('[I ')[1].split(' main')[0],
+                '%Y%m%d %H:%M:%S'
+                )
+            diff = (last_datetime - first_datetime).seconds
+            CONFIG['LOGGER'].info(f'process required: {diff} sec')
+    else:
+        CONFIG['LOGGER'].info('currently run files are not available')
+    
     #get list of unprocessed files
     if args.report_process_status:
         s_batches = set()
@@ -206,11 +233,16 @@ def report(args, CONFIG):
             p_name = Path(file).name
             if p_name in remaining_audio_files:
                 remaining_audio_files_list.append(file)
+
+        CONFIG['LOGGER'].info(f'there are {len( s_batches )} processed')
+        CONFIG['LOGGER'].info(f'there are {len(remaining_audio_files_list)} remaining')
+
         remaining_path = CONFIG['INTERMEDIATE_PATH'] / 'remaining_list.json'
         with open(remaining_path, 'w') as f:
             json.dump(remaining_audio_files_list, f)
         return True
     
+    #export hits to csv for review
     if args.report_text_classify:
         intermediate_files = []
         for idx,lst in batches.items():
@@ -238,29 +270,35 @@ def output(CONFIG):
     """Output whatever current intermediate files exist."""
     #json files
     batch_list_path = CONFIG['INTERMEDIATE_PATH'] / 'batch_list.json'
-    with open(batch_list_path, 'r') as f:
-        batches = json.dump(f)
+    if batch_list_path:
+        with open(batch_list_path, 'r') as f:
+            batches = json.load(f)
+    else:
+        CONFIG['LOGGER'].info('batch_list.json not available')
 
     #workspace
     schema = CONFIG['INTERMEDIATE_PATH'] / 'workspace_schema_v0.2.1.json'
-    with open(schema, 'r') as f:
-        workspace_schema = json.load(f)
+    if schema:
+        with open(schema, 'r') as f:
+            workspace_schema = json.load(f)
+    else:
+        CONFIG['LOGGER'].info('workspace_schema_v0.2.1.json not available')
 
     #run workflow on batches
     logger.info("Begin workflow on each batch")
     for idx, batch in batches.items():
         dialogues = []
         for file in batch:
-            file_path = CONFIG['INTERMEDIATE_PATH'] / f'{file}.json'
+            file_path = CONFIG['INTERMEDIATE_PATH'] / f'{file}'
             with open(file_path, 'r') as f:
-                dialogue = json.load(file)
+                dialogue = json.load(f)
                 dialogues.append(dialogue)
 
         #export
         logger.info("Begin export")
-        file_path = CONFIG['OUTPUT_PATH'] / f'VDI_ApplicationStateData_v0.2.1-{idx+1}.gz'
-        check = utils.export_to_vdi_workspace(workspace_schema, dialogues, file_path)
-        logger.info(f"Data processed for batch-{idx+1}: {check}")
+        output_path = CONFIG['OUTPUT_PATH'] / f'VDI_ApplicationStateData_v0.2.1-{int(idx)+1}.gz'
+        check = utils.export_to_vdi_workspace(workspace_schema, dialogues, output_path)
+        logger.info(f"Data processed for batch-{int(idx)+1}: {check}")
 
 
 
@@ -271,6 +309,7 @@ def main(args):
 
     CONFIG = {}
     try:
+        CONFIG['LOGGER'] = logger
         CONFIG['INPUT_PATH'] = Path(args.input)
         #TODO:add UNZIPPED
         #TODO:add loaded models

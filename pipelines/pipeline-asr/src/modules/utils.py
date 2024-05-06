@@ -103,13 +103,6 @@ def get_decompressed_filepath(filepath, target_extension=[]):
 
 
 def format_dialogue_timestamps(dialogue):
-    """..."""
-    #TODO: test this from separating code from `output_to_pdf()`, below
-    mod_dialogue = dialogue
-    return mod_dialogue
-
-
-def output_to_pdf(dialogue, filename=None, output_type='file'):
     """Transform output and convert to PDF.
     file_path = Path('./output.json')
     with open(file_path, ) as f:
@@ -143,7 +136,44 @@ def output_to_pdf(dialogue, filename=None, output_type='file'):
     for idx in range(len(timestamps)):
         item = f'{stamps[idx]}  -  {lines[idx]["text"]} \n'
         results.append(item)
+    return results
 
+
+def output_to_pdf(dialogue, results, filename=None, output_type='file'):
+    """Transform output and convert to PDF.
+    file_path = Path('./output.json')
+    with open(file_path, ) as f:
+        output = json.load(f)
+    lines = output['chunks']
+
+    'results.pdf'
+    
+    results = []
+    
+    lines = dialogue['chunks']
+    timestamps = [line['timestamp'] for line in lines]
+    stamps = [[-1,-1] for idx in range(len(timestamps))]
+    trigger = False
+    try:
+        for idx in range(len(timestamps)):
+            if idx==0:
+                stamps[0] = timestamps[0]
+            elif (timestamps[idx][0] == timestamps[idx-1][1]) and trigger==False:
+                stamps[idx]= timestamps[idx]
+            elif trigger==True:
+                stamps[idx] = [ (stamps[idx-1])[1], stamps[idx-1][1] + timestamps[idx][1] ]
+            else:
+                stamps[idx] = [ timestamps[idx-1][1], timestamps[idx-1][1] + timestamps[idx][1] ]
+                trigger = True
+    except Exception as e:
+        print(e)
+        #TODO:Whisper did not predict an ending timestamp, which can happen if audio is cut off in the middle of a word.  Also make sure WhisperTimeStampLogitsProcessor was used during generation.
+        return None
+
+    for idx in range(len(timestamps)):
+        item = f'{stamps[idx]}  -  {lines[idx]["text"]} \n'
+        results.append(item)
+    """
     #print( ('').join(results) )
     str_results = ('').join(results)
     pdf = text_to_pdf(str_results)
@@ -239,7 +269,8 @@ def export_to_vdi_workspace(workspace, dialogues, filepath):
     for dialogue in dialogues:
         mod_dialogue = format_dialogue_timestamps(dialogue)
         pdf = output_to_pdf(
-            dialogue=mod_dialogue,
+            dialogue=dialogue,
+            results=mod_dialogue,
             output_type='str'
         )
         if pdf!=None:
