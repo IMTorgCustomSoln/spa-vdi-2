@@ -292,7 +292,7 @@ def output(CONFIG):
     logger.info("Begin workflow on each batch")
     for idx, batch in enumerate(batch_items):
         dialogues = []
-        for file in batch[0][1]:
+        for file in batch:
             file_path =  Path(file)             #CONFIG['INTERMEDIATE_PATH'] / f'{file}'
             if file_path.is_file():
                 with open(file_path, 'r') as f:
