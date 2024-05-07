@@ -187,9 +187,16 @@ def test_main_batch_1():
 
 def test_main_batch_4():
     class Args:
+        task='all'
         input=Path(os.getcwd()) / 'samples'
         batch_count=4
         prepare_models=False
+        prepare_schema=False
+        prepare_file_list=False
+        infer_text_classify_only=False
+        infer_from_remaining_list=False
+        report_process_status=False
+        report_text_classify=False
     args = Args()
     main(args)
 

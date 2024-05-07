@@ -337,6 +337,11 @@ def main(args):
         report(args, CONFIG)
     elif args.task == 'output':
         output(CONFIG)
+    elif args.task == 'all':
+        prepare(args, CONFIG)
+        infer(args, CONFIG)
+        report(args, CONFIG)
+        output(CONFIG)
     else:
         pass
 
@@ -354,7 +359,7 @@ if __name__ == "__main__":
 
     # Required (or with default) positional argument
     parser.add_argument("task", 
-                        choices=['prepare', 'infer', 'report', 'output'],
+                        choices=['prepare', 'infer', 'report', 'output', 'all'],
                         help="Required positional argument")
     
     #if parser.parse_args().task in ['infer', 'output']:

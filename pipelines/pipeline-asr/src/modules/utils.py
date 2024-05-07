@@ -112,7 +112,7 @@ def format_dialogue_timestamps(dialogue):
     'results.pdf'
     """
     def format_round(num):
-        return round(num, 2) if num!=None else None
+        return round(float(num), 2) if num!=None else None
     
     results = []
     lines = dialogue['chunks']

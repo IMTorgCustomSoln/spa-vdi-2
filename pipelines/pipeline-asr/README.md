@@ -99,6 +99,25 @@ pipenv run pytest --collect-only
   - convenience functions:
     + 
     + ~~compare file_list.json???~~
+* process
+  - ~~intermediate .json files are correct~~
+  - ~~prepare example files~~
+  - setup remainder_list.json
+    + get all .json files (root and subdirs)
+    + sort on: acct_date_index
+    + group by: acct
+  - run
+    + mod batch to group by acct
+    + combine audio files into one document, separate pages <--- AUDIO FILE ${file_name} --->
+    + incorrect image (follow from client)
+  - round timestamps
+  - fix duplicates
+* reporting: accounting by acct
+  - number of accounts
+    + audio files per acct
+* product
+  - deploy client, awaiting
+  - table: score sort
 * models
   - ~~add batching to pipeline~~
   - integrate EnteroDoc
@@ -107,4 +126,4 @@ pipenv run pytest --collect-only
     + audio per second processed, by machine
     + workspace size (mb) per audio size (mb)
     + vdi import limitations
-    + => determine zip file batching
+    + => determine zip file batching, 100 .json files
