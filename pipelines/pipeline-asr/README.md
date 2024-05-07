@@ -38,7 +38,20 @@ $ nohup python main.py infer samples/ 4 --infer_from_remaining_list; echo 'Job f
 Then, review running jobs with: `$ jobs`
 
 
+## Performance
 
+Using a g5.4xlarge: RHEL8, 16vCPU, 64GB RAM, with A100 gpu (24GB video memory), we can get throughput of ~35 audio files / minute.
+
+```python
+from datetime import datetime
+
+tm1 = '240503 19:13:12'
+tm2 = '240506 12:48:13'
+rt1 = datetime.strptime(tm1, '%y%m%d %H:%M:%S')
+rt2 = datetime.strptime(tm2, '%y%m%d %H:%M:%S')
+37045 / (rt2 - rt1).seconds * 60
+#35.1131
+```
 
 
 ## Dev & Test
@@ -73,19 +86,19 @@ pipenv run pytest --collect-only
 * logging
   - ~~all files ingested~~
   - ~~processing time~~
-  - audio file errors => TODO:ISSUE - not possible
-  - accounting to validate all files processed
+  - ~~audio file errors => TODO:ISSUE - not possible~~
+  - ~~accounting to validate all files processed~~
   - ~~all files included in a batch => each file is a batch and saved to intermediate json~~
 * run
   - ~~via commandline from within workspace~~
   - ~~dirs: logs, output (dated)~~
-  - separate preparation (finetune) from workflow
-  - load from intermediate files (.json)
-  - create Workspace from current output
-  - multiple audio files per zip
+  - ~~separate preparation (finetune) from workflow~~
+  - ~~load from intermediate files (.json)~~
+  - ~~create Workspace from current output~~
+  - ~~multiple audio files per zip~~
   - convenience functions:
     + 
-    + compare file_list.json???
+    + ~~compare file_list.json???~~
 * models
   - ~~add batching to pipeline~~
   - integrate EnteroDoc

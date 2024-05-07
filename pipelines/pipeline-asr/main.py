@@ -208,12 +208,12 @@ def report(args, CONFIG):
         if last_idx:
             first_idx = [idx for idx, item in enumerate(l_comments[last_idx:]) if 'Begin process' in item][0]
             last_datetime = datetime.strptime(
-                '20'+log_file[last_idx].split('[I ')[1].split(' main')[0],
-                '%Y%m%d %H:%M:%S'
+                log_file[last_idx].split('[I ')[1].split(' main')[0],
+                '%y%m%d %H:%M:%S'
                 )
             first_datetime = datetime.strptime(
-                '20'+log_file[last_idx+first_idx].split('[I ')[1].split(' main')[0],
-                '%Y%m%d %H:%M:%S'
+                log_file[last_idx+first_idx].split('[I ')[1].split(' main')[0],
+                '%y%m%d %H:%M:%S'
                 )
             diff = (last_datetime - first_datetime).seconds
             CONFIG['LOGGER'].info(f'process required: {diff} sec')
