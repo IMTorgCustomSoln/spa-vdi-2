@@ -153,7 +153,7 @@ def test_output_batch_files():
     class Args:
         task='output'
         input=Path(os.getcwd()) / 'samples'
-        batch_count=1
+        batch_count=4
     args = Args()
     main(args)
     assert True == True

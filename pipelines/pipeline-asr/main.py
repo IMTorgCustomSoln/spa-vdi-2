@@ -275,6 +275,10 @@ def output(CONFIG):
             batches = json.load(f)
     else:
         CONFIG['LOGGER'].info('batch_list.json not available')
+    batch_items = utils.get_next_batch(
+        lst=list(*batches.values()), 
+        batch_count=CONFIG['BATCH_COUNT']
+        )
 
     #workspace
     schema = CONFIG['INTERMEDIATE_PATH'] / 'workspace_schema_v0.2.1.json'
@@ -286,13 +290,14 @@ def output(CONFIG):
 
     #run workflow on batches
     logger.info("Begin workflow on each batch")
-    for idx, batch in batches.items():
+    for idx, batch in enumerate(batch_items):
         dialogues = []
-        for file in batch:
-            file_path = CONFIG['INTERMEDIATE_PATH'] / f'{file}'
-            with open(file_path, 'r') as f:
-                dialogue = json.load(f)
-                dialogues.append(dialogue)
+        for file in batch[0][1]:
+            file_path =  Path(file)             #CONFIG['INTERMEDIATE_PATH'] / f'{file}'
+            if file_path.is_file():
+                with open(file_path, 'r') as f:
+                    dialogue = json.load(f)
+                    dialogues.append(dialogue)
 
         #export
         logger.info("Begin export")
