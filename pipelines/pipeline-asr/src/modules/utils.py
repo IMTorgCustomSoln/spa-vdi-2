@@ -111,10 +111,12 @@ def format_dialogue_timestamps(dialogue):
 
     'results.pdf'
     """
-    results = []
+    def format_round(num):
+        return round(num, 2) if num!=None else None
     
+    results = []
     lines = dialogue['chunks']
-    timestamps = [line['timestamp'] for line in lines]
+    timestamps = [(format_round(line['timestamp'][0]), format_round(line['timestamp'][1])) for line in lines]
     stamps = [[-1,-1] for idx in range(len(timestamps))]
     trigger = False
     try:
@@ -175,7 +177,11 @@ def output_to_pdf(dialogue, results, filename=None, output_type='file'):
         results.append(item)
     """
     #print( ('').join(results) )
-    str_results = ('').join(results)
+    if type(results)==list and len(results) > 0:
+        str_intermediate_results = ('').join(results)
+        str_results = ('').join( [i if ord(i) < 128 else ' ' for i in str_intermediate_results] )
+    else:
+        str_results = '[0.0, 1.0] -  <This message failed to transcribe correctly>. \n'
     pdf = text_to_pdf(str_results)
 
     if output_type=='file':
@@ -214,10 +220,17 @@ def text_to_pdf(text):
     pdf.set_auto_page_break(True, margin=margin_bottom_mm)
     pdf.add_page()
     pdf.set_font(family='Courier', size=fontsize_pt)
-    splitted = text.split('\n')
+    if '\n' in text:
+        splitted = text.split('\n')
+    else:
+        splitted = text
 
     for line in splitted:
-        lines = textwrap.wrap(line, width_text)
+        try:
+            lines = textwrap.wrap(line, width_text)
+        except Exception as e:
+            print(e)
+            lines = [line[:int(width_text)]]
 
         if len(lines) == 0:
             pdf.ln()
