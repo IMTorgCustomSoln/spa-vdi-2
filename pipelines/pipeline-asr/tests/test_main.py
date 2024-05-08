@@ -147,7 +147,7 @@ def test_report_on_intermediate_classify_results():
     assert True == True
 
 
-#WORKS, TODO:NOW
+#WORKS
 def test_output_to_excel():
     """
     Scenario:

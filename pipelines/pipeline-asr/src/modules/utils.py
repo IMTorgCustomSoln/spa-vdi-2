@@ -5,11 +5,13 @@ from src.modules.styled_text import StyledText
 import pandas as pd
 #import xlsxwriter
 
+
 from pathlib import Path
 import os
 import json
 import gzip, zipfile
 import shutil
+from collections import Iterable
 
 
 
@@ -323,7 +325,10 @@ def export_to_output(schema, dialogues, filepath, output_type='vdi_workspace'):
             scores = [model['pred'] for model in pdf['dialogue']['classifier'] if 'pred' in model.keys()]
             document_record['score'] = max(scores) if len(scores)>0 else 0.0
 
-            text = '  '.join(pdf['dialogue']['formatted'])   #\015
+            if isinstance(pdf['dialogue']['formatted'], Iterable):
+                text = '  '.join(pdf['dialogue']['formatted'])   #\015
+            else:
+                text = pdf['dialogue']['formatted']
             label = []
             for model in pdf['dialogue']['classifier']:
                 if 'pred' in model.keys():
