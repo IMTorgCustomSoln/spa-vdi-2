@@ -152,9 +152,11 @@ def format_dialogue_timestamps(dialogue):
             elif (timestamps[idx][0] == timestamps[idx-1][1]) and trigger==False:
                 stamps[idx]= timestamps[idx]
             elif trigger==True:
-                stamps[idx] = [ (stamps[idx-1])[1], stamps[idx-1][1] + timestamps[idx][1] ]
+                accum = stamps[idx-1][1] + timestamps[idx][1]
+                stamps[idx] = [ (stamps[idx-1])[1], format_round(accum) ]
             else:
-                stamps[idx] = [ timestamps[idx-1][1], timestamps[idx-1][1] + timestamps[idx][1] ]
+                accum = stamps[idx-1][1] + timestamps[idx][1]
+                stamps[idx] = [ timestamps[idx-1][1], format_round(accum) ]
                 trigger = True
     except Exception as e:
         print(e)
@@ -323,7 +325,7 @@ def export_to_output(schema, dialogues, filepath, output_type='vdi_workspace'):
             except Exception as e:
                 print(e)
         else:
-            df.to_xlsx(filepath)
+            df.to_excel(filepath)
         return True
 
     elif output_type == 'vdi_workspace':
