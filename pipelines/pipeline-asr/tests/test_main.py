@@ -148,6 +148,22 @@ def test_report_on_intermediate_classify_results():
 
 
 #WORKS, TODO:NOW
+def test_output_to_excel():
+    """
+    Scenario:
+    * ~~need `batch_list.json` of processed audio files~~
+    * need `remaining_list.json` of processed audio files
+    * run>>> `python main.py output samples/ 4`
+    """
+    class Args:
+        task='output'
+        input=Path(os.getcwd()) / 'samples'
+        batch_count=1
+        output_type_excel=True
+    args = Args()
+    main(args)
+    assert True == True
+
 def test_output_batch_files():
     """
     Scenario:

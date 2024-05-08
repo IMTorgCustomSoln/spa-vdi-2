@@ -283,7 +283,7 @@ def report(args, CONFIG):
     return False
 
 
-def output(CONFIG):
+def output(args, CONFIG):
     """Output whatever current intermediate files exist."""
     #json files
     '''
@@ -344,8 +344,12 @@ def output(CONFIG):
 
         #export
         logger.info("Begin export")
-        output_path = CONFIG['OUTPUT_PATH'] / f'VDI_ApplicationStateData_v0.2.1-{int(idx)+1}.gz'
-        check = utils.export_to_vdi_workspace(workspace_schema, batch_dialogues, output_path)
+        if args.output_type_excel:
+            output_path = CONFIG['OUTPUT_PATH'] / f'batch-{int(idx)+1}.xlsx'
+            check = utils.export_to_output(workspace_schema, batch_dialogues, output_path, 'excel')
+        else:
+            output_path = CONFIG['OUTPUT_PATH'] / f'VDI_ApplicationStateData_v0.2.1-{int(idx)+1}.gz'
+            check = utils.export_to_output(workspace_schema, batch_dialogues, output_path, 'vdi_workspace')
         logger.info(f"Data processed for batch-{int(idx)+1}: {check}")
 
 
@@ -379,12 +383,12 @@ def main(args):
     elif args.task == 'report':
         report(args, CONFIG)
     elif args.task == 'output':
-        output(CONFIG)
+        output(args, CONFIG)
     elif args.task == 'all':
         prepare(args, CONFIG)
         infer(args, CONFIG)
         report(args, CONFIG)
-        output(CONFIG)
+        output(args, CONFIG)
     else:
         pass
 
@@ -424,6 +428,9 @@ if __name__ == "__main__":
     #report options
     parser.add_argument("-p", "--report_process_status", action="store_true", default=False)
     parser.add_argument("-t", "--report_text_classify", action="store_true", default=False)
+
+    #output options
+    parser.add_argument("-e", "--output_type_excel", action="store_true", default=False)
 
 
     # Specify output of "--version"

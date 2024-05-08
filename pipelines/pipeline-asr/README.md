@@ -15,6 +15,8 @@ Ensure dependencies are correct.  You may have to upgrade with the following: `p
 
 Change `src/asr.py` at `asr_pipeline = pipeline(...` to `whisper-large`.
 
+Install [styled_text](https://github.com/IMTorgOpenDataTools/styled-text) the usual way.
+
 ```
 $ pipenv install
 ```

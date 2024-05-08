@@ -20,6 +20,6 @@ def test_export_to_vdi_workspace():
                    ]
     #run workflow
     pdfs = asr.run_workflow(sound_files)
-    check = utils.export_to_vdi_workspace(pdfs)
+    check = utils.export_to_output(pdfs)
 
     assert check == True

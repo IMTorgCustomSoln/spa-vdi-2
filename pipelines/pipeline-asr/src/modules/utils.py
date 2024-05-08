@@ -1,5 +1,10 @@
 
 
+from src.modules.styled_text import StyledText
+
+import pandas as pd
+#import xlsxwriter
+
 from pathlib import Path
 import os
 import json
@@ -298,10 +303,48 @@ def get_schema_from_workspace(filepath):
     return workspace_schema
 
 
-def export_to_vdi_workspace(workspace, dialogues, filepath):
+def export_to_output(schema, dialogues, filepath, output_type='vdi_workspace'):
     """..."""
-    workspace_schema = copy.deepcopy(workspace)
+    workspace_schema = copy.deepcopy(schema)
     documents_schema = workspace_schema['documentsIndex']['documents']
+
+    if output_type == 'excel':
+        documents = []
+        for dialogue in dialogues:
+        
+            dialogue['formatted'] = format_dialogue_timestamps(dialogue)
+            pdf = {'dialogue': dialogue}
+            document_record = {}        #copy.deepcopy(documents_schema)
+            
+            document_record['filename_original'] = pdf['dialogue']['file_name']
+            document_record['account'] = pdf['dialogue']['file_name'].split('_')[0]
+            document_record['date'] = pdf['dialogue']['file_name'].split('_')[1]
+
+            scores = [model['pred'] for model in pdf['dialogue']['classifier'] if 'pred' in model.keys()]
+            document_record['score'] = max(scores) if len(scores)>0 else 0.0
+
+            text = '  '.join(pdf['dialogue']['formatted'])   #\015
+            label = []
+            for model in pdf['dialogue']['classifier']:
+                if 'pred' in model.keys():
+                    index = text.find(model['target'])
+                    item = [index, len(model['target']), True]
+                    label.append(item)
+
+            document_record['data'] = text
+            document_record['label'] = label
+            document_record['filepath'] = pdf['dialogue']['file_path']
+            documents.append(document_record)
+        
+        raw = pd.DataFrame(documents)
+        df = raw.sort_values(by=['account','score'])
+        case_results = StyledText.df_to_xlsx(df=df, output_path=filepath, verbose=True)
+        
+        return True
+
+
+
+    #elif output_type == 'excel':
 
     #to string
     pdfs = []
