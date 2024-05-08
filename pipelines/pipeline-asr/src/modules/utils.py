@@ -325,7 +325,8 @@ def export_to_output(schema, dialogues, filepath, output_type='vdi_workspace'):
             scores = [model['pred'] for model in pdf['dialogue']['classifier'] if 'pred' in model.keys()]
             document_record['score'] = max(scores) if len(scores)>0 else 0.0
 
-            if isinstance(pdf['dialogue']['formatted'], Iterable):
+            check_iter = isinstance(pdf['dialogue']['formatted'], Iterable)
+            if check_iter:
                 text = '  '.join(pdf['dialogue']['formatted'])   #\015
                 label = []
                 for model in pdf['dialogue']['classifier']:
@@ -344,7 +345,10 @@ def export_to_output(schema, dialogues, filepath, output_type='vdi_workspace'):
         
         raw = pd.DataFrame(documents)
         df = raw.sort_values(by=['account','score'])
-        case_results = StyledText.df_to_xlsx(df=df, output_path=filepath, verbose=True)
+        if check_iter:
+            case_results = StyledText.df_to_xlsx(df=df, output_path=filepath, verbose=True)
+        else:
+            df.to_xlsx(filepath)
         
         return True
 
