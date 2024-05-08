@@ -345,8 +345,11 @@ def export_to_output(schema, dialogues, filepath, output_type='vdi_workspace'):
         
         raw = pd.DataFrame(documents)
         df = raw.sort_values(by=['account','score'])
-        if check_iter:
-            case_results = StyledText.df_to_xlsx(df=df, output_path=filepath, verbose=True)
+        if check_iter and len(text)>0:
+            try:
+                case_results = StyledText.df_to_xlsx(df=df, output_path=filepath, verbose=True)
+            except Exception as e:
+                print(e)
         else:
             df.to_xlsx(filepath)
         
