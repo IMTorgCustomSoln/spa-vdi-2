@@ -65,6 +65,12 @@ pipenv run pytest --collect-only
 /home/node/.local/share/virtualenvs/pipeline-asr-WU7QSYkE/bin/pytest --collect-only
 ```
 
+A single test can be run with:
+
+```
+py.test tests/tests_utils.py  -k 'test_export_to_output_single_file'
+```
+
 
 ## Note
 
@@ -113,8 +119,9 @@ pipenv run pytest --collect-only
     + NO ~~combine audio files into one document, separate pages <--- AUDIO FILE ${file_name} --->~~ should they be combined??? => NO b/c harder to determine audio file => KEEP IN SAME BATCH
 * process dialogue
   - incorrect image (follow from client)
-  - round timestamps
+  - ~~round timestamps~~
   - fix duplicates
+  - fix empties
 * reporting: accounting by acct
   - number of accounts
     + audio files per acct

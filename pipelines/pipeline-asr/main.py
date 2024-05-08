@@ -351,6 +351,7 @@ def output(args, CONFIG):
             output_path = CONFIG['OUTPUT_PATH'] / f'VDI_ApplicationStateData_v0.2.1-{int(idx)+1}.gz'
             check = utils.export_to_output(workspace_schema, batch_dialogues, output_path, 'vdi_workspace')
         logger.info(f"Data processed for batch-{int(idx)+1}: {check}")
+    return True
 
 
 
