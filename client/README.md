@@ -39,7 +39,8 @@ python create_estimation_model.py --input_dir = "./tests/logs/"
 * Search
   - ~~fuzzy
   - ~~exact
-  - models with sensitivity filter
+  - ~~models 
+    + with sensitivity filter
   - concept
 * Read
   - ~~file selection

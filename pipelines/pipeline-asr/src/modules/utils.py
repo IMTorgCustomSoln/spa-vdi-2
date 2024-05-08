@@ -302,7 +302,7 @@ def export_to_output(schema, dialogues, filepath, output_type='vdi_workspace'):
             document_record['search'] = highest_pred_target['search']
             document_record['target'] = highest_pred_target['target']
             document_record['pred'] = highest_pred_target['pred']
-            document_record['data'] = text
+            document_record['data'] = text                              #TODO:note - excel has limit of ~32,767 characters
             document_record['label'] = label
             document_record['filepath'] = pdf['dialogue']['file_path']
             documents.append(document_record)

@@ -71,7 +71,7 @@ def test_output_to_pdf():
     assert True == True
 
 
-def test_export_to_output_single_file():
+def test_export_to_output_excel_single_file():
     '''
     test_file = ''
     with open(test_file, 'r') as f:
@@ -81,4 +81,17 @@ def test_export_to_output_single_file():
     schema = {"documentsIndex": {"documents": {}}}
     filepath = Path('/workspaces/spa-vdi-2/pipelines/pipeline-asr/samples/OUTPUT/') / "batch-TEST.xlsx"
     utils.export_to_output(schema, dialogues, filepath, output_type="excel")
+    assert True == True
+
+
+def test_export_to_output_vdi_workspace_single_file():
+    '''
+    test_file = ''
+    with open(test_file, 'r') as f:
+        dialogue1 = json.load(f)
+    '''
+    dialogues = [dialogue1]
+    schema = {"documentsIndex": {"documents": {}}}
+    filepath = Path('/workspaces/spa-vdi-2/pipelines/pipeline-asr/samples/OUTPUT/') / "batch-TEST.gz"
+    utils.export_to_output(schema, dialogues, filepath, output_type="workspace")
     assert True == True
