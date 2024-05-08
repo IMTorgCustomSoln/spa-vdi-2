@@ -88,14 +88,15 @@ def infer(args, CONFIG):
     
     TODO: re-run text classification models on intermediate files
     """
+    '''
     batch_list_path = CONFIG['INTERMEDIATE_PATH'] / 'batch_list.json'
     if batch_list_path.is_file():
         with open(batch_list_path, 'r') as f:
             batches = json.load(f)
     else:
         batches = {}
+    '''
     sound_files_list = []
-
     if not args.infer_from_remaining_list:
         #load sound files
         file_list_path = CONFIG['INTERMEDIATE_PATH'] / 'file_list.json'
@@ -105,8 +106,11 @@ def infer(args, CONFIG):
     else:
         remaining_list_path = CONFIG['INTERMEDIATE_PATH'] / 'remaining_list.json'
         with open(remaining_list_path, 'r') as f:
-            string_sound_files_list = json.load(f)
-        sound_files_list = [Path(file) for file in string_sound_files_list]
+            string_sound_files_dict = json.load(f)
+        for k,v in string_sound_files_dict.items():
+            string_sound_files_dict[k] = [Path(file) for file in string_sound_files_dict[k]]
+            sound_files_list.extend( string_sound_files_dict[k] )
+        #sound_files_list = [Path(file) for file in string_sound_files_list]
 
     #run complete workflow on batches
     if not args.infer_text_classify_only:
@@ -120,9 +124,9 @@ def infer(args, CONFIG):
                 sound_files=batch, 
                 intermediate_save_dir=CONFIG['INTERMEDIATE_PATH']
                 )
-            keys = len(batches.keys())
-            batches[keys+idx] = batch_files
-            logger.info("End workflow")
+            #keys = len(batches.keys())
+            #batches[keys+idx] = batch_files
+            logger.info(f"End workflow, index: {idx}")
 
             '''
             #export
@@ -144,8 +148,8 @@ def infer(args, CONFIG):
             batches[keys+idx] = batch_files
             logger.info("End workflow")
 
-    with open(batch_list_path, 'w') as f:
-        json.dump(batches, f)
+    #with open(batch_list_path, 'w') as f:
+    #    json.dump(batches, f)
     return True
 
 
@@ -162,21 +166,25 @@ def report(args, CONFIG):
     if file_list_path.is_file():
         with open(file_list_path, 'r') as f:
             audio_files = json.load(f)
-
+    
     #get currently processed files 
+    '''
     batch_list_path = CONFIG['INTERMEDIATE_PATH'] / 'batch_list.json'
     if batch_list_path.is_file():
         with open(batch_list_path, 'r') as f:
             batches_from_batch_list = json.load(f)
 
+    '''
     batches_from_file_dir = {}
     batches_from_file_dir['0'] = [file.resolve() for file in CONFIG['INTERMEDIATE_PATH'].glob('**/*')
                                   if ('_list' not in file.name
                                       and '_schema' not in file.name
                                       and '.json' in file.name
                                       )]
+    batches = list(*batches_from_file_dir.values())
     
     #update batch_list.json if corrupt
+    '''
     if 'batches_from_batch_list' in locals():
         if list(batches_from_file_dir.values()) != list(batches_from_batch_list.values()):
             batches = batches_from_file_dir
@@ -194,10 +202,12 @@ def report(args, CONFIG):
             s_batches[idx] = [str(file) for file in file_list]
         with open(batch_list_path, 'w') as f:
             json.dump(s_batches, f)
+    '''
     
     #get results of previous run
+    '''
     if 'batches_from_batch_list' in locals():
-        files_processed_current_run = len( list(batches_from_batch_list.values()) )
+        files_processed_current_run = len( batches_from_batch_list )
         CONFIG['LOGGER'].info(f'count of currently run files is: {files_processed_current_run} ')
         with open(Path(logging_dir), 'r') as f:
             log_file = f.readlines()
@@ -219,29 +229,35 @@ def report(args, CONFIG):
             CONFIG['LOGGER'].info(f'process required: {diff} sec')
     else:
         CONFIG['LOGGER'].info('currently run files are not available')
+    '''
     
     #get list of unprocessed files
     if args.report_process_status:
         s_batches = set()
-        for k,v in batches.items():
+        for k,v in batches:
             [s_batches.add( Path(file).name.replace('.json','') ) for file in v]
         s_audio_files = set()
         [s_audio_files.add( Path(file).name ) for file in audio_files]
         remaining_audio_files = list( s_audio_files.difference(s_batches) )
-        remaining_audio_files_list = []
+        remaining_audio_files_dict = {}
         for file in audio_files:
             p_name = Path(file).name
+            acct_no = p_name.split('_')[0]
             if p_name in remaining_audio_files:
-                remaining_audio_files_list.append(file)
+                if acct_no not in remaining_audio_files_dict.keys():
+                    remaining_audio_files_dict[acct_no] = []
+                if file not in remaining_audio_files_dict[acct_no]:
+                    remaining_audio_files_dict[acct_no].append(file)
 
         CONFIG['LOGGER'].info(f'there are {len( s_batches )} processed')
-        CONFIG['LOGGER'].info(f'there are {len(remaining_audio_files_list)} remaining')
+        CONFIG['LOGGER'].info(f'there are {len(remaining_audio_files_dict)} remaining')
 
         remaining_path = CONFIG['INTERMEDIATE_PATH'] / 'remaining_list.json'
         with open(remaining_path, 'w') as f:
-            json.dump(remaining_audio_files_list, f)
+            json.dump(remaining_audio_files_dict, f)
         return True
     
+    '''
     #export hits to csv for review
     if args.report_text_classify:
         intermediate_files = []
@@ -262,6 +278,7 @@ def report(args, CONFIG):
         df_path = CONFIG['INTERMEDIATE_PATH'] / 'hit_list.csv'
         df.to_csv(df_path, index=False)
         return True
+    '''
     
     return False
 
@@ -269,14 +286,36 @@ def report(args, CONFIG):
 def output(CONFIG):
     """Output whatever current intermediate files exist."""
     #json files
+    '''
     batch_list_path = CONFIG['INTERMEDIATE_PATH'] / 'batch_list.json'
     if batch_list_path:
         with open(batch_list_path, 'r') as f:
             batches = json.load(f)
     else:
         CONFIG['LOGGER'].info('batch_list.json not available')
-    batch_items = utils.get_next_batch(
-        lst=list(*batches.values()), 
+    
+    remaining_list_path = CONFIG['INTERMEDIATE_PATH'] / 'remaining_list.json'
+    with open(remaining_list_path, 'r') as f:
+        remaining_list_dict = json.load(f)
+    for k,v in remaining_list_dict.items():
+        remaining_list_dict[k] = [Path(file) for file in remaining_list_dict[k]]
+    '''
+    intermediate_files = [file.resolve() for file in CONFIG['INTERMEDIATE_PATH'].glob('**/*')
+                                  if ('_list' not in file.name
+                                      and '_schema' not in file.name
+                                      and '.json' in file.name
+                                      )]
+    intermediate_files_dict = {}
+    for file in intermediate_files:
+        key = file.name.split('_')[0]
+        if key in intermediate_files_dict.keys():
+            intermediate_files_dict[key].append(file)
+        else:
+            intermediate_files_dict[key] = []
+            intermediate_files_dict[key].append(file)
+
+    batch_items = utils.get_next_batch_from_dict(
+        dictn=intermediate_files_dict, 
         batch_count=CONFIG['BATCH_COUNT']
         )
 
@@ -290,19 +329,23 @@ def output(CONFIG):
 
     #run workflow on batches
     logger.info("Begin workflow on each batch")
-    for idx, batch in enumerate(batch_items):
-        dialogues = []
-        for file in batch:
-            file_path =  Path(file)             #CONFIG['INTERMEDIATE_PATH'] / f'{file}'
-            if file_path.is_file():
-                with open(file_path, 'r') as f:
-                    dialogue = json.load(f)
-                    dialogues.append(dialogue)
+    for idx, batch_dict in enumerate(batch_items):
+        batch_dialogues = []
+        for acct, files in batch_dict.items():
+            acct_dialogues = []
+            for file in files:
+                file_path = Path(file)
+                if file_path.is_file():
+                    with open(file_path, 'r') as f:
+                        dialogue = json.load(f)
+                        acct_dialogues.append(dialogue)
+            acct_file = utils.combine_account_files(acct_dialogues)             
+            batch_dialogues.extend(acct_file)
 
         #export
         logger.info("Begin export")
         output_path = CONFIG['OUTPUT_PATH'] / f'VDI_ApplicationStateData_v0.2.1-{int(idx)+1}.gz'
-        check = utils.export_to_vdi_workspace(workspace_schema, dialogues, output_path)
+        check = utils.export_to_vdi_workspace(workspace_schema, batch_dialogues, output_path)
         logger.info(f"Data processed for batch-{int(idx)+1}: {check}")
 
 

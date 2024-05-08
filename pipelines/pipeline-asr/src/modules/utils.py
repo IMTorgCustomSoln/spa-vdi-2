@@ -18,18 +18,44 @@ def absoluteFilePaths(directory):
             yield Path( os.path.abspath(os.path.join(dirpath, f)) )
 
 
-def get_next_batch(lst, batch_count):
+def get_next_batch_from_list(lst, batch_count):
     """...."""
-    final_idx = int(len(lst)/batch_count-1)
-    index_list = list(range( final_idx + 1  ))
-    remainder = len(lst)%batch_count
-    for idx in index_list:
-        init = idx * batch_count
-        if remainder>0 and idx==final_idx:
-            batch = lst[init: (idx+1) * batch_count+remainder]
-        else:
-            batch = lst[init: (idx+1) * batch_count]
-        yield batch
+    if type(lst)==list:
+        final_idx = int(len(lst)/batch_count-1)
+        index_list = list(range( final_idx + 1  ))
+        remainder = len(lst)%batch_count
+        for idx in index_list:
+            init = idx * batch_count
+            if remainder>0 and idx==final_idx:
+                batch = lst[init: (idx+1) * batch_count+remainder]
+            else:
+                batch = lst[init: (idx+1) * batch_count]
+            yield batch
+
+
+def get_next_batch_from_dict(dictn, batch_count):
+    """...."""
+    if type(dictn)==dict:
+        key_count = len(list(dictn.keys()))
+        keys_accumulator = []
+        accumulator = []
+        for idx, (k,v) in enumerate(dictn.items()):
+            keys_accumulator.append(k)
+            accumulator.extend( v )
+            if len(accumulator)<batch_count and idx<(key_count-1):
+                pass
+            else:
+                batch = {k:v for k,v in dictn.items() if k in keys_accumulator}
+                keys_accumulator.clear()
+                accumulator.clear()
+                yield batch
+
+
+def combine_account_files(file_list):
+    """..."""
+    return file_list
+
+
 
 
 def get_decompressed_filepath(filepath, target_extension=[]):

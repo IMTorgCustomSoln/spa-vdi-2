@@ -99,17 +99,18 @@ pipenv run pytest --collect-only
   - convenience functions:
     + 
     + ~~compare file_list.json???~~
-* process
+* process batch
   - ~~intermediate .json files are correct~~
   - ~~prepare example files~~
-  - setup remainder_list.json
-    + get all .json files (root and subdirs)
-    + sort on: acct_date_index
-    + group by: acct
-  - run
-    + mod batch to group by acct
-    + combine audio files into one document, separate pages <--- AUDIO FILE ${file_name} --->
-    + incorrect image (follow from client)
+  - ~~setup remainder_list.json~~
+  - run on batches
+    + ~~get all .json files (root and subdirs)~~
+    + ~~sort on: acct_date_index~~
+    + ~~group by: acct~~
+    + ~~mod batch to group by acct~~ 
+    + NO ~~combine audio files into one document, separate pages <--- AUDIO FILE ${file_name} --->~~ should they be combined??? => NO b/c harder to determine audio file => KEEP IN SAME BATCH
+* process dialogue
+  - incorrect image (follow from client)
   - round timestamps
   - fix duplicates
 * reporting: accounting by acct

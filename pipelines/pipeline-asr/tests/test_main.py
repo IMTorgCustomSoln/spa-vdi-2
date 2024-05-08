@@ -48,7 +48,7 @@ def test_prepare_model():
     main(args)
     assert True == True
 
-def test_infer_audio_files():
+def test_DEPRECATE_infer_audio_files():
     """
     Scenario:
     * ran `python main.py prepare samples/ 4 -sfm`
@@ -66,6 +66,28 @@ def test_infer_audio_files():
     main(args)
     assert True == True
 
+#WORKS
+def test_report_on_remaining_audio_files():
+    """
+    Scenario:
+    * need `remaining_list.json` of unprocessed audio files
+    * run>>> `python main.py report samples/ 4 --report_process_status`
+    """
+    class Args:
+        task='report'
+        input=Path(os.getcwd()) / 'samples'
+        batch_count=4
+        prepare_models=False
+        prepare_schema=False
+        prepare_file_list=False
+        infer_text_classify_only=False
+        report_process_status=True
+        report_text_classify=False
+    args = Args()
+    main(args)
+    assert True == True
+
+#WORKS
 def test_reinfer_remaining_audio_files():
     """
     Scenario:
@@ -124,30 +146,13 @@ def test_report_on_intermediate_classify_results():
     main(args)
     assert True == True
 
-def test_report_on_remaining_audio_files():
-    """
-    Scenario:
-    * need `remaining_list.json` of unprocessed audio files
-    * run>>> `python main.py report samples/ 4 --report_process_status`
-    """
-    class Args:
-        task='report'
-        input=Path(os.getcwd()) / 'samples'
-        batch_count=4
-        prepare_models=False
-        prepare_schema=False
-        prepare_file_list=False
-        infer_text_classify_only=False
-        report_process_status=True
-        report_text_classify=False
-    args = Args()
-    main(args)
-    assert True == True
 
+#WORKS, TODO:NOW
 def test_output_batch_files():
     """
     Scenario:
-    * need `batch_list.json` of processed audio files
+    * ~~need `batch_list.json` of processed audio files~~
+    * need `remaining_list.json` of processed audio files
     * run>>> `python main.py output samples/ 4`
     """
     class Args:
