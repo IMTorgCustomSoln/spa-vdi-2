@@ -115,7 +115,7 @@ def infer(args, CONFIG):
     #run complete workflow on batches
     if not args.infer_text_classify_only:
         logger.info("Begin workflow on each batch")
-        for idx, batch in enumerate( utils.get_next_batch(sound_files_list, CONFIG['BATCH_COUNT']) ):
+        for idx, batch in enumerate( utils.get_next_batch_from_list(sound_files_list, CONFIG['BATCH_COUNT']) ):
             #batch_files = [str(file) for file in batch]
             #batches[idx] = batch_files
             batch_files = run_workflow(
@@ -234,8 +234,8 @@ def report(args, CONFIG):
     #get list of unprocessed files
     if args.report_process_status:
         s_batches = set()
-        for k,v in batches:
-            [s_batches.add( Path(file).name.replace('.json','') ) for file in v]
+        for file in batches:
+            s_batches.add( Path(file).name.replace('.json',''))
         s_audio_files = set()
         [s_audio_files.add( Path(file).name ) for file in audio_files]
         remaining_audio_files = list( s_audio_files.difference(s_batches) )

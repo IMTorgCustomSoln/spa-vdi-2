@@ -175,6 +175,7 @@ def test_output_batch_files():
         task='output'
         input=Path(os.getcwd()) / 'samples'
         batch_count=1
+        output_type_excel=False
     args = Args()
     main(args)
     assert True == True
