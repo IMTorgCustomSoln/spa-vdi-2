@@ -120,7 +120,7 @@ pipenv run pytest --collect-only
     + audio files per acct
 * product
   - deploy client, awaiting
-  - table: score sort
+  - ~~table: acct, score sort~~
 * models
   - ~~add batching to pipeline~~
   - integrate EnteroDoc

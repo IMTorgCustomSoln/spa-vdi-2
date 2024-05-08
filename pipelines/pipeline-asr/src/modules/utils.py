@@ -136,16 +136,9 @@ def get_decompressed_filepath(filepath, target_extension=[]):
 
 
 def format_dialogue_timestamps(dialogue):
-    """Transform output and convert to PDF.
-    file_path = Path('./output.json')
-    with open(file_path, ) as f:
-        output = json.load(f)
-    lines = output['chunks']
-
-    'results.pdf'
-    """
+    """Transform output and convert to PDF"""
     def format_round(num):
-        return round(float(num), 2) if num!=None else None
+        return round(float(num), 1) if num!=None else None
     
     results = []
     lines = dialogue['chunks']
@@ -175,40 +168,7 @@ def format_dialogue_timestamps(dialogue):
 
 
 def output_to_pdf(dialogue, results, filename=None, output_type='file'):
-    """Transform output and convert to PDF.
-    file_path = Path('./output.json')
-    with open(file_path, ) as f:
-        output = json.load(f)
-    lines = output['chunks']
-
-    'results.pdf'
-    
-    results = []
-    
-    lines = dialogue['chunks']
-    timestamps = [line['timestamp'] for line in lines]
-    stamps = [[-1,-1] for idx in range(len(timestamps))]
-    trigger = False
-    try:
-        for idx in range(len(timestamps)):
-            if idx==0:
-                stamps[0] = timestamps[0]
-            elif (timestamps[idx][0] == timestamps[idx-1][1]) and trigger==False:
-                stamps[idx]= timestamps[idx]
-            elif trigger==True:
-                stamps[idx] = [ (stamps[idx-1])[1], stamps[idx-1][1] + timestamps[idx][1] ]
-            else:
-                stamps[idx] = [ timestamps[idx-1][1], timestamps[idx-1][1] + timestamps[idx][1] ]
-                trigger = True
-    except Exception as e:
-        print(e)
-        #TODO:Whisper did not predict an ending timestamp, which can happen if audio is cut off in the middle of a word.  Also make sure WhisperTimeStampLogitsProcessor was used during generation.
-        return None
-
-    for idx in range(len(timestamps)):
-        item = f'{stamps[idx]}  -  {lines[idx]["text"]} \n'
-        results.append(item)
-    """
+    """Transform output and convert to PDF."""
     #print( ('').join(results) )
     if type(results)==list and len(results) > 0:
         str_intermediate_results = ('').join(results)
@@ -216,7 +176,6 @@ def output_to_pdf(dialogue, results, filename=None, output_type='file'):
     else:
         str_results = '[0.0, 1.0] -  <This message failed to transcribe correctly>. \n'
     pdf = text_to_pdf(str_results)
-
     if output_type=='file':
         pdf.output(filename, 'F')
         return True
@@ -313,38 +272,51 @@ def export_to_output(schema, dialogues, filepath, output_type='vdi_workspace'):
     if output_type == 'excel':
         documents = []
         for dialogue in dialogues:
-        
             dialogue['formatted'] = format_dialogue_timestamps(dialogue)
             pdf = {'dialogue': dialogue}
             document_record = {}        #copy.deepcopy(documents_schema)
-            
             document_record['filename_original'] = pdf['dialogue']['file_name']
             document_record['account'] = pdf['dialogue']['file_name'].split('_')[0]
             document_record['date'] = pdf['dialogue']['file_name'].split('_')[1]
-
-            scores = [model['pred'] for model in pdf['dialogue']['classifier'] if 'pred' in model.keys()]
-            document_record['score'] = max(scores) if len(scores)>0 else 0.0
-
+            #scores = [model['pred'] for model in pdf['dialogue']['classifier'] if 'pred' in model.keys()]
+            #document_record['score'] = max(scores) if len(scores)>0 else 0.0
             check_iter = isinstance(pdf['dialogue']['formatted'], Iterable)
             if check_iter:
                 text = '  '.join(pdf['dialogue']['formatted'])   #\015
                 label = []
+                highest_pred_target = {'pred': 0.0, 'target': None, 'search': None}
                 for model in pdf['dialogue']['classifier']:
                     if 'pred' in model.keys():
                         index = text.find(model['target'])
                         item = [index, len(model['target']), True]
                         label.append(item)
+                        if highest_pred_target['pred'] < model['pred']:
+                            highest_pred_target['pred'] = model['pred']
+                            highest_pred_target['target'] = model['target']
+                            highest_pred_target['search'] = model['search']
             else:
                 text = pdf['dialogue']['formatted']
                 label = []
-
+            document_record['search'] = highest_pred_target['search']
+            document_record['target'] = highest_pred_target['target']
+            document_record['pred'] = highest_pred_target['pred']
             document_record['data'] = text
             document_record['label'] = label
             document_record['filepath'] = pdf['dialogue']['file_path']
             documents.append(document_record)
-        
         raw = pd.DataFrame(documents)
-        df = raw.sort_values(by=['account','score'])
+        raw.rename(columns={
+            'filename_original': 'File_Name', 
+            'account': 'Account', 
+            'date': 'Call_Date', 
+            'pred': 'Score', 
+            'target': 'Text_Hit', 
+            'search': 'Model_Type',
+            'data': 'data', 
+            'label': 'label',
+            'filepath': 'File_Path'
+            }, inplace=True)
+        df = raw.sort_values(by=['Account','Score'], ascending=False)
         if check_iter and len(text)>0:
             try:
                 case_results = StyledText.df_to_xlsx(df=df, output_path=filepath, verbose=True)
@@ -352,137 +324,64 @@ def export_to_output(schema, dialogues, filepath, output_type='vdi_workspace'):
                 print(e)
         else:
             df.to_xlsx(filepath)
-        
         return True
 
-
-
-    #elif output_type == 'excel':
-
-    #to string
-    pdfs = []
-    for dialogue in dialogues:
-        mod_dialogue = format_dialogue_timestamps(dialogue)
-        pdf = output_to_pdf(
-            dialogue=dialogue,
-            results=mod_dialogue,
-            output_type='str'
-        )
-        if pdf!=None:
-            pdfs.append(pdf)
-
-    #load documents
-    documents = []
-    for idx, pdf in enumerate(pdfs):
-        document_record = copy.deepcopy(documents_schema)
-        pdf_pages = {}
-        with io.BytesIO(pdf['byte_string']) as open_pdf_file:
-            reader = PdfReader(open_pdf_file)
-            for page in range( len(reader.pages) ):
-                text = reader.pages[page].extract_text()
-                pdf_pages[page+1] = text
-
-        #raw
-        document_record['id'] = str(idx)
-        document_record['body_chars'] = {idx+1: len(page) for idx, page in enumerate(pdf_pages.values())}                 #{1: 3958, 2: 3747, 3: 4156, 4: 4111,
-        document_record['body_pages'] = pdf_pages                                                                           #{1: 'Weakly-Supervised Questions for Zero-Shot Relation…a- arXiv:2301.09640v1 [cs.CL] 21 Jan 2023<br><br>', 2: 'tive approach without using any gold question temp…et al., 2018) with unanswerable questions<br><br>', 3: 'by generating a special unknown token in the out- …ng training. These spurious questions can<br><b
-        document_record['date_created'] = None
-        #document_record['length_lines'] = None    #0
-        #document_record['length_lines_array'] = None    #[26, 26, 7, 
-        document_record['page_nos'] = pdf['object'].pages.__len__()
-        data_array = {idx: val for idx,val in enumerate(list( pdf['byte_string'] ))}        #new list of integers that are the ascii values of the byte string
-        document_record['dataArray'] = data_array
-        document_record['toc'] = []
-        document_record['pp_toc'] = ''
-        document_record['clean_body'] = ' '.join( list(pdf_pages.values()) )
-        
-        #file info
-        document_record['file_extension'] = pdf['dialogue']['file_name'].split('.')[1]
-        document_record['file_size_mb'] = None
-        document_record['filename_original'] = pdf['dialogue']['file_name']
-        document_record['filepath'] = pdf['dialogue']['file_path']
-        document_record['filetype'] = 'audio'
-        document_record['date'] = None
-        document_record['reference_number'] = None
-        document_record['sort_key'] = 0
-        document_record['hit_count'] = 0
-        document_record['snippets'] = []
-        document_record['summary'] = "TODO:summary"
-        document_record['_showDetails'] = False
-        document_record['_activeDetailsTab'] = 0
-
-        document_record['models'] = pdf['dialogue']['classifier']
-
-
-
-
-        '''
-        #original
-        document_record['id'] = idx
-        document_record['filepath'] = pdf['dialogue']['file_path']
-        document_record['filename_original'] = pdf['dialogue']['file_name']
-        document_record['filename_modified'] = pdf['dialogue']['file_name']
-        document_record['file_extension'] = pdf['dialogue']['file_name'].split('.')[1]
-        document_record['filetype'] = 'audio'
-        document_record['page_nos'] = pdf['object'].pages.__len__()
-
-        document_record['dataArray'] = None
-        data_array = {idx: val for idx,val in enumerate(list( pdf['byte_string'] ))}        #new list of integers that are the ascii values of the byte string
-        document_record['dataArray'] = data_array
-        document_record['length_lines'] = None
-        document_record['file_size_mb'] = None
-        document_record['date'] = None
-        document_record['toc'] = None
-        document_record['pp_toc'] = ''
-
-        'accumPageChars'
-        'body_chars'
-        'html_body'
-        document_record['body_chars'] = None
-        document_record['body_pages'] = None
-        document_record['clean_body'] = ' '.join( list(pdf_pages.values()) )
-
-        document_record['sort_key'] = 0
-        document_record['hit_count'] = 0
-        document_record['snippets'] = []
-        document_record['selected_snippet_page'] = 1
-        document_record['_showDetails'] = False
-        document_record['_activeDetailsTab'] = 0
-        document_record['accumPageLines'] = None
-        '''
-
-        documents.append(document_record)
-
-    #load lunr index => TODO:REMOVE
-    #workspace_schema['documentsIndex']['indices']['lunrIndex'] = {}
-
-
-    #compare
-    workspace_schema['documentsIndex']['documents'] = documents
-    #json.dumps(workspace_schema) == json.dumps(workspace_json)
-    #list(workspace_json['documentsIndex']['documents'][0]['dataArray'].values())
-    #list( pdf['byte_string'] )
-
-    #export
-    #filepath_export_wksp_gzip = Path('./tests/results/VDI_ApplicationStateData_vTEST.gz')
-    filepath_export_wksp_gzip = filepath
-
-    with gzip.open(filepath_export_wksp_gzip, 'wb') as f_out:
-        f_out.write( bytes(json.dumps(workspace_schema), encoding='utf8') )
-
-    return True
-        
-
-    
-
-
-
-
-
-
-
-
-
-
-if __name__ == "__main__":
-    output_to_pdf()
+    elif output_type == 'vdi_workspace':
+        #to string
+        pdfs = []
+        for dialogue in dialogues:
+            mod_dialogue = format_dialogue_timestamps(dialogue)
+            pdf = output_to_pdf(
+                dialogue=dialogue,
+                results=mod_dialogue,
+                output_type='str'
+            )
+            if pdf!=None:
+                pdfs.append(pdf)
+        #load documents
+        documents = []
+        for idx, pdf in enumerate(pdfs):
+            document_record = copy.deepcopy(documents_schema)
+            pdf_pages = {}
+            with io.BytesIO(pdf['byte_string']) as open_pdf_file:
+                reader = PdfReader(open_pdf_file)
+                for page in range( len(reader.pages) ):
+                    text = reader.pages[page].extract_text()
+                    pdf_pages[page+1] = text
+            #raw
+            document_record['id'] = str(idx)
+            document_record['body_chars'] = {idx+1: len(page) for idx, page in enumerate(pdf_pages.values())}                 #{1: 3958, 2: 3747, 3: 4156, 4: 4111,
+            document_record['body_pages'] = pdf_pages                                                                           #{1: 'Weakly-Supervised Questions for Zero-Shot Relation…a- arXiv:2301.09640v1 [cs.CL] 21 Jan 2023<br><br>', 2: 'tive approach without using any gold question temp…et al., 2018) with unanswerable questions<br><br>', 3: 'by generating a special unknown token in the out- …ng training. These spurious questions can<br><b
+            document_record['date_created'] = None
+            #document_record['length_lines'] = None    #0
+            #document_record['length_lines_array'] = None    #[26, 26, 7, 
+            document_record['page_nos'] = pdf['object'].pages.__len__()
+            data_array = {idx: val for idx,val in enumerate(list( pdf['byte_string'] ))}        #new list of integers that are the ascii values of the byte string
+            document_record['dataArray'] = data_array
+            document_record['toc'] = []
+            document_record['pp_toc'] = ''
+            document_record['clean_body'] = ' '.join( list(pdf_pages.values()) )
+            #file info
+            document_record['file_extension'] = pdf['dialogue']['file_name'].split('.')[1]
+            document_record['file_size_mb'] = None
+            document_record['filename_original'] = pdf['dialogue']['file_name']
+            document_record['filepath'] = pdf['dialogue']['file_path']
+            document_record['filetype'] = 'audio'
+            document_record['date'] = None
+            document_record['reference_number'] = None
+            document_record['sort_key'] = 0
+            document_record['hit_count'] = 0
+            document_record['snippets'] = []
+            document_record['summary'] = "TODO:summary"
+            document_record['_showDetails'] = False
+            document_record['_activeDetailsTab'] = 0
+            document_record['models'] = pdf['dialogue']['classifier']
+            documents.append(document_record)
+        #validate
+        workspace_schema['documentsIndex']['documents'] = documents
+        #export
+        #filepath_export_wksp_gzip = Path('./tests/results/VDI_ApplicationStateData_vTEST.gz')
+        filepath_export_wksp_gzip = filepath
+        with gzip.open(filepath_export_wksp_gzip, 'wb') as f_out:
+            f_out.write( bytes(json.dumps(workspace_schema), encoding='utf8') )
+        return True

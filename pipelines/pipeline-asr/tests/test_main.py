@@ -164,7 +164,7 @@ def test_output_to_excel():
     main(args)
     assert True == True
 
-def test_output_batch_files():
+def test_output_vdi_workspace():
     """
     Scenario:
     * ~~need `batch_list.json` of processed audio files~~
