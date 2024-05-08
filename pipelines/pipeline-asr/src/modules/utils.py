@@ -327,14 +327,15 @@ def export_to_output(schema, dialogues, filepath, output_type='vdi_workspace'):
 
             if isinstance(pdf['dialogue']['formatted'], Iterable):
                 text = '  '.join(pdf['dialogue']['formatted'])   #\015
+                label = []
+                for model in pdf['dialogue']['classifier']:
+                    if 'pred' in model.keys():
+                        index = text.find(model['target'])
+                        item = [index, len(model['target']), True]
+                        label.append(item)
             else:
                 text = pdf['dialogue']['formatted']
-            label = []
-            for model in pdf['dialogue']['classifier']:
-                if 'pred' in model.keys():
-                    index = text.find(model['target'])
-                    item = [index, len(model['target']), True]
-                    label.append(item)
+                label = []
 
             document_record['data'] = text
             document_record['label'] = label
