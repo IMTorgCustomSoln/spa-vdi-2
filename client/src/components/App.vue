@@ -15,7 +15,7 @@
             <div>
                 <b-row>
                     <b-col cols="12">
-                        <splitpanes class="default-theme" vertical style="height: 100%; width=100%;">
+                        <splitpanes class="default-theme" vertical style="height: 100%; width:100%;">
                             <pane :size="this.appDisplayStore.views.attrs.table.size">
                                 <Table :records="userContentStore.documentsIndex.documents" :search="searchTableResults"
                                     :tableFields="this.appDisplayStore.views.attrs.table.fields"
@@ -26,7 +26,8 @@
                             <pane :size="this.appDisplayStore.views.attrs.pdfViewer.size">
                                 <div
                                     v-if="appDisplayStore.views.viewSelection == 'read' && userContentStore.documentsIndex.documents.length > 0">
-                                    <PdfViewer />
+                                    <!--<PdfViewer />-->
+                                    <PdfPlaceholder />
                                 </div>
                             </pane>
                         </splitpanes>
@@ -46,6 +47,7 @@ import NavbarTop from '@/components/NavbarTop.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import Table from '@/components/Table.vue'
 import PdfViewer from '@/components/PdfViewer.vue'
+import PdfPlaceholder from '@/components/PdfPlaceholder.vue'
 
 
 import { mapStores } from 'pinia'
@@ -60,6 +62,7 @@ export default {
         SearchBar,
         Table,
         PdfViewer,
+        PdfPlaceholder,
 
         Splitpanes, Pane
     },
