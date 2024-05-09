@@ -125,12 +125,6 @@ py.test tests/test_utils.py  -k 'test_export_to_output_excel_single_file' -s
   - ~~fix empties~~
 * output: workspace
   - incorrect image (follow from client)
-* reporting: accounting by acct
-  - number of accounts
-    + audio files per acct
-* product
-  - ~~deploy client, awaiting~~
-  - ~~table: acct, score sort~~
 * design
   - oop design
   - ~~add batching to pipeline~~
@@ -142,3 +136,9 @@ py.test tests/test_utils.py  -k 'test_export_to_output_excel_single_file' -s
     + workspace size (mb) per audio size (mb)
     + vdi import limitations
     + => determine zip file batching, 100 .json files
+* reporting: accounting by acct
+  - number of accounts
+    + audio files per acct
+* product
+  - ~~deploy client, awaiting~~
+  - ~~table: acct, score sort~~

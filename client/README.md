@@ -58,6 +58,12 @@ python create_estimation_model.py --input_dir = "./tests/logs/"
 
 __Staging__
 
+* style
+  - sort Score by descending
+  - terms used: `<CARES package>`
+  - READ > text block: enable scrolling
+  - READ > improve space efficiency in panels
+
 * search 
   - ~~dropdown for search type~~
   - ~~searchExact() does not work~~
