@@ -111,7 +111,8 @@ const searchTableFields = [{
 const readTableFields = [{
     key: 'sort_key',
     label: 'Score',
-    sortable: true
+    sortable: true,
+    formatter: "getFormattedScore"
 }, {
     key: 'title',
     label: 'Title',

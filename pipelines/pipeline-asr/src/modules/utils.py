@@ -333,13 +333,14 @@ def export_to_output(schema, dialogues, filepath, output_type='vdi_workspace'):
             'filepath': 'File_Path'
             }, inplace=True)
         df = raw.sort_values(by=['Account','Score'], ascending=False)
-        if check_iter and len(text)>0:
-            try:
-                case_results = StyledText.df_to_xlsx(df=df, output_path=filepath, verbose=True)
-            except Exception as e:
-                print(e)
-        else:
-            df.to_excel(filepath)
+        #TODO:fix
+        #if check_iter and len(text)>0:
+        #    try:
+        #        case_results = StyledText.df_to_xlsx(df=df, output_path=filepath, verbose=True)
+        #    except Exception as e:
+        #        print(e)
+        #else:
+        df.to_excel(filepath, index=False)
         return True
 
     elif output_type == 'vdi_workspace':
@@ -372,7 +373,7 @@ def export_to_output(schema, dialogues, filepath, output_type='vdi_workspace'):
             #document_record['length_lines'] = None    #0
             #document_record['length_lines_array'] = None    #[26, 26, 7, 
             document_record['page_nos'] = pdf['object'].pages.__len__()
-            document_record['length_lines'] = pdf['dialogue']['formatted'].__len__()
+            document_record['length_lines'] = pdf['dialogue']['formatted'].__len__() if pdf['dialogue']['formatted']!=None else 0
             data_array = {idx: val for idx,val in enumerate(list( pdf['byte_string'] ))}        #new list of integers that are the ascii values of the byte string
             document_record['dataArray'] = data_array
             document_record['toc'] = []

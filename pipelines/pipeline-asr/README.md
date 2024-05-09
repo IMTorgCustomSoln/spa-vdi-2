@@ -117,26 +117,27 @@ py.test tests/test_utils.py  -k 'test_export_to_output_excel_single_file' -s
     + ~~group by: acct~~
     + ~~mod batch to group by acct~~ 
     + NO ~~combine audio files into one document, separate pages <--- AUDIO FILE ${file_name} --->~~ should they be combined??? => NO b/c harder to determine audio file => KEEP IN SAME BATCH
-* process dialogue: excel
-  - incorrect image (follow from client)
+* output: excel
+  - fix styling
+  - fix error `usupported operand type(s) for +:  'float' and 'NoneType' 
   - ~~round timestamps~~
-  - fix duplicates
+  - ~~fix duplicates~~ => empty sound
   - ~~fix empties~~
-* process dialogue: workspace
+* output: workspace
   - incorrect image (follow from client)
-  - fix duplicates
-  - fix empties
 * reporting: accounting by acct
   - number of accounts
     + audio files per acct
 * product
-  - deploy client, awaiting
+  - ~~deploy client, awaiting~~
   - ~~table: acct, score sort~~
-* models
+* design
+  - oop design
   - ~~add batching to pipeline~~
   - integrate EnteroDoc
-  - add total audio length - where?
-  - performance testing
+  - ...
+  - ~~add total audio length - where?~~ => use lines for Sentences
+* Performance testing
     + audio per second processed, by machine
     + workspace size (mb) per audio size (mb)
     + vdi import limitations
