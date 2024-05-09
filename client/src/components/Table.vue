@@ -424,11 +424,20 @@ ready to be organized with the note Topics.`
             this.items.map(item => this.$set(item, '_activeDetailsTab', this.activeDetailsTab))
         },
         formatDateAssigned(value) {
-            const dt = getDateFromJsNumber(value)
+            let dt = null
+            if(Number.isInteger(value)){
+                dt = getDateFromJsNumber(value)
+            }else if(typeof value === 'string' || value instanceof String){
+                dt = value.split('T')[0]
+            }
             return dt;
         },
         getFormattedFileSize(value) {
             return getFormattedFileSize(value, 'unit')
+        },
+        getFormattedScore(value){
+            const decimal = Math.round(parseFloat(value) * 1000) / 1000
+            return decimal
         },
         getFormattedPath(path) {
             return path ? path : './'

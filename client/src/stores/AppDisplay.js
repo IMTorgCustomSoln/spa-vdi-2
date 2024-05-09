@@ -70,7 +70,8 @@ export const useAppDisplay = defineStore('appDisplay', {
 const searchTableFields = [{
     key: 'sort_key',
     label: 'Score',
-    sortable: true
+    sortable: true,
+    formatter: "getFormattedScore"
 }, {
     key: 'id',
     label: 'Id'
@@ -103,7 +104,7 @@ const searchTableFields = [{
 }, {
     key: 'date',
     sortable: true,
-    //formatter: "formatDateAssigned"
+    formatter: "formatDateAssigned"
 }]
 
 
@@ -112,8 +113,7 @@ const readTableFields = [{
     label: 'Score',
     sortable: true
 }, {
-    key: 'filepath',
-    label: 'Path',
-    sortable: true,
-    formatter: "getFormattedPath"
+    key: 'title',
+    label: 'Title',
+    sortable: true
 },]

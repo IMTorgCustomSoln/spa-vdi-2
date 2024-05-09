@@ -11,7 +11,7 @@ import os
 import json
 import gzip, zipfile
 import shutil
-from collections import Iterable
+from collections.abc import Iterable
 
 
 
@@ -266,6 +266,20 @@ def get_schema_from_workspace(filepath):
     return workspace_schema
 
 
+date_handler = lambda obj: (
+    obj.isoformat()
+    if isinstance(obj, (datetime.datetime, datetime.date))
+    else None
+)
+
+
+
+
+
+
+from datetime import datetime
+
+
 def export_to_output(schema, dialogues, filepath, output_type='vdi_workspace'):
     """..."""
     workspace_schema = copy.deepcopy(schema)
@@ -332,10 +346,10 @@ def export_to_output(schema, dialogues, filepath, output_type='vdi_workspace'):
         #to string
         pdfs = []
         for dialogue in dialogues:
-            mod_dialogue = format_dialogue_timestamps(dialogue)
+            dialogue['formatted'] = format_dialogue_timestamps(dialogue)
             pdf = output_to_pdf(
                 dialogue=dialogue,
-                results=mod_dialogue,
+                results=dialogue['formatted'],
                 output_type='str'
             )
             if pdf!=None:
@@ -358,21 +372,26 @@ def export_to_output(schema, dialogues, filepath, output_type='vdi_workspace'):
             #document_record['length_lines'] = None    #0
             #document_record['length_lines_array'] = None    #[26, 26, 7, 
             document_record['page_nos'] = pdf['object'].pages.__len__()
+            document_record['length_lines'] = pdf['dialogue']['formatted'].__len__()
             data_array = {idx: val for idx,val in enumerate(list( pdf['byte_string'] ))}        #new list of integers that are the ascii values of the byte string
             document_record['dataArray'] = data_array
             document_record['toc'] = []
             document_record['pp_toc'] = ''
             document_record['clean_body'] = ' '.join( list(pdf_pages.values()) )
             #file info
-            document_record['file_extension'] = pdf['dialogue']['file_name'].split('.')[1]
-            document_record['file_size_mb'] = None
-            document_record['filename_original'] = pdf['dialogue']['file_name']
-            document_record['filepath'] = pdf['dialogue']['file_path']
+            record_path = Path(pdf['dialogue']['file_path'])
+            document_record['file_extension'] = record_path.suffix
+            document_record['file_size_mb'] = record_path.stat().st_size
+            document_record['filename_original'] = record_path.name
+            document_record['title'] = record_path.name
+            document_record['filepath'] = str(record_path)
             document_record['filetype'] = 'audio'
-            document_record['date'] = None
-            document_record['reference_number'] = None
-            document_record['sort_key'] = 0
-            document_record['hit_count'] = 0
+            dt = record_path.stem.split('_')[1]
+            document_record['date'] = (datetime(int(dt[0:4]), int(dt[4:6]), int(dt[6:8]) )).isoformat()
+            document_record['reference_number'] = record_path.stem.split('_')[0]
+            highest_pred_target = max(pdf['dialogue']['classifier'], key=lambda model: model['pred'] if 'pred' in model.keys() else 0 )
+            document_record['sort_key'] = highest_pred_target['pred'] if 'pred' in highest_pred_target.keys() else 0.0
+            document_record['hit_count'] = len([model for model in pdf['dialogue']['classifier'] if model!={}])
             document_record['snippets'] = []
             document_record['summary'] = "TODO:summary"
             document_record['_showDetails'] = False
@@ -385,5 +404,5 @@ def export_to_output(schema, dialogues, filepath, output_type='vdi_workspace'):
         #filepath_export_wksp_gzip = Path('./tests/results/VDI_ApplicationStateData_vTEST.gz')
         filepath_export_wksp_gzip = filepath
         with gzip.open(filepath_export_wksp_gzip, 'wb') as f_out:
-            f_out.write( bytes(json.dumps(workspace_schema), encoding='utf8') )
+            f_out.write( bytes(json.dumps(workspace_schema, default=date_handler), encoding='utf8') )    #TODO: datetime handlder, ref: https://stackoverflow.com/questions/455580/json-datetime-between-python-and-javascript
         return True

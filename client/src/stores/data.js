@@ -73,7 +73,7 @@ export class DocumentRecord{
       this.dataArrayKey = dataArrayKey          //Uint8Array
       this.dataArray = null
       this.length_lines = length_lines          //sentences
-      this.file_size_mb = file_size_mb 
+      this.file_size_mb = file_size_mb          //TODO:Issue - is this actually in bytes?  It is in python and in utils.js formatter
       this.date = date
 
       //inferred / searchable

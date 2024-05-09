@@ -174,7 +174,7 @@ def test_output_vdi_workspace():
     class Args:
         task='output'
         input=Path(os.getcwd()) / 'samples'
-        batch_count=1
+        batch_count=10
         output_type_excel=False
     args = Args()
     main(args)

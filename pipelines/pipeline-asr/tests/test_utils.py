@@ -91,7 +91,10 @@ def test_export_to_output_vdi_workspace_single_file():
         dialogue1 = json.load(f)
     '''
     dialogues = [dialogue1]
-    schema = {"documentsIndex": {"documents": {}}}
+    schema_path = Path('/workspaces/spa-vdi-2/pipelines/pipeline-asr/samples/PROCESSED/') / 'workspace_schema_v0.2.1.json'
+    if schema_path.is_file():
+        with open(schema_path, 'r') as f:
+            workspace_schema = json.load(f)
     filepath = Path('/workspaces/spa-vdi-2/pipelines/pipeline-asr/samples/OUTPUT/') / "batch-TEST.gz"
-    utils.export_to_output(schema, dialogues, filepath, output_type="workspace")
+    utils.export_to_output(workspace_schema, dialogues, filepath, output_type="vdi_workspace")
     assert True == True
