@@ -426,8 +426,10 @@ ready to be organized with the note Topics.`
         formatDateAssigned(value) {
             let dt = null
             if(Number.isInteger(value)){
+                //???
                 dt = getDateFromJsNumber(value)
             }else if(typeof value === 'string' || value instanceof String){
+                //iso format from python
                 dt = value.split('T')[0]
             }
             return dt;
