@@ -138,6 +138,11 @@ export class DocumentRecord{
       this.prepareForIndexDb = rec.prepareForIndexDb
       */
 
+      //display
+      if(this.title==null || this.title==''){
+        this.title = this.filepath.split('\\').pop().split('/').pop()
+      }
+
       // body items
       let bodyArr = Object.values(this.body_pages)
       this.body = bodyArr.length > 0 ? bodyArr.reduce((partialSum, a) => partialSum += (a || 0)) : ''

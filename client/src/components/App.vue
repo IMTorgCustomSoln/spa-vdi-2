@@ -26,8 +26,10 @@
                             <pane :size="this.appDisplayStore.views.attrs.pdfViewer.size">
                                 <div
                                     v-if="appDisplayStore.views.viewSelection == 'read' && userContentStore.documentsIndex.documents.length > 0">
-                                    <!--<PdfViewer />-->
-                                    <PdfPlaceholder />
+                                    <div class="viewer">
+                                        <!--<PdfViewer />-->
+                                        <PdfPlaceholder />
+                                    </div>
                                 </div>
                             </pane>
                         </splitpanes>
@@ -105,5 +107,8 @@ export default {
 <style>
 .fluid-wide {
     max-width: 2200px;
+}
+.viewer {
+    margin: 5px;
 }
 </style>

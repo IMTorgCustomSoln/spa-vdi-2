@@ -5,6 +5,7 @@ import { IdbConfig } from './idb_mgmt'
 import { DatabaseName, DbVersion, StoreNamesAndKeyFields } from './constants'
 
 
+
 const idbConfig = new IdbConfig(DatabaseName, DbVersion, StoreNamesAndKeyFields)
 const supported = await idbConfig.checkIdbSupport()
 if (supported) {

@@ -12,7 +12,8 @@
         <b-row>
             <b-col :cols="this.appDisplayStore.views.attrs.table.colsTable">
                 <b-table hover :items="items" :fields="fields" :filter="tableFilter" :filter-function="onFiltered"
-                    :sort-by.sync="sortBy" :sort-desc.sync="sortDesc" primary-key='id' striped small responsive="sm"
+                    :sort-by.sync="sortBy" :sort-desc.sync="sortDesc" :sort-direction="desc"
+                    primary-key='id' striped small responsive="sm"
                     sticky-header="1000px" bordered thead-class="tableHead bg-dark text-white"
                     @row-clicked="expandAdditionalInfo">
 
@@ -76,7 +77,7 @@
             </b-col>
 
 
-            <b-col :cols="this.appDisplayStore.views.attrs.table.collsSnippets">
+            <b-col ><!--:cols="this.appDisplayStore.views.attrs.table.collsSnippets">-->
                 <div
                     v-if="appDisplayStore.views.viewSelection == 'read' && userContentStore.documentsIndex.documents.length > 0">
                     <div class="itemconfiguration snippet_container">
@@ -176,7 +177,7 @@ export default {
 
             tableFilter: [],
             sortBy: 'sort_key',
-            sortDesc: false,
+            sortDesc: true,
 
             totalDocuments: 0,
             activeDetailsTab: 1,

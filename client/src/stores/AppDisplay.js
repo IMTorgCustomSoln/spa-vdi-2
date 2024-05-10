@@ -52,8 +52,8 @@ export const useAppDisplay = defineStore('appDisplay', {
                 this.views.attrs.table.toggleExpansionBtn = false
                 this.views.attrs.pdfViewer.size = 50
 
-                this.views.attrs.table.colsTable = 6
-                this.views.attrs.table.colsSnippets = 6
+                this.views.attrs.table.colsTable = 0
+                this.views.attrs.table.colsSnippets = 0
             }
         }
 
@@ -71,6 +71,7 @@ const searchTableFields = [{
     key: 'sort_key',
     label: 'Score',
     sortable: true,
+    sortDirection: 'desc',
     formatter: "getFormattedScore"
 }, {
     key: 'id',
@@ -112,6 +113,7 @@ const readTableFields = [{
     key: 'sort_key',
     label: 'Score',
     sortable: true,
+    sortDirection: 'desc',
     formatter: "getFormattedScore"
 }, {
     key: 'title',

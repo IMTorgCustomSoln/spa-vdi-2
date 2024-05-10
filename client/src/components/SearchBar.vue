@@ -318,9 +318,11 @@ The results are ordered by the 'Score' column, which is a weighted formula of th
             const totalCount = resultGroups.map(item => item.positions.length).map((sum => value => sum += value)(0))[resultGroups.length - 1]
             //const resultIds = removeDuplicatesUsingSet(resultGroups.filter(item => item.positions.length > 0).map(result => result.ref))
             phrases.push( ...removeDuplicatesUsingSet(resultGroups.map(item => item.phrase)) )
-            const formattedPhrases = [phrases[0].slice(0,3).join('\u00A0 ...\n \u00A0\u00A0\u00A0\u00A0')]
+            const rawKeyTerms = phrases.flat().filter(item => item.trim().split(' ').length == 1)
+            const keyTerms = rawKeyTerms.length > 0 ? rawKeyTerms : ['...no single-key terms used']
+            const formattedTerms = [keyTerms.join('\u00A0 ...\n \u00A0\u00A0\u00A0\u00A0')]
 
-            this.searchDisplayResults = { ...this.searchDisplayResults, searchTerms: formattedPhrases }
+            this.searchDisplayResults = { ...this.searchDisplayResults, searchTerms: formattedTerms }
             this.searchDisplayResults = { ...this.searchDisplayResults, totalDocuments: resultIds.length }
             this.searchDisplayResults = { ...this.searchDisplayResults, count: totalCount }
 

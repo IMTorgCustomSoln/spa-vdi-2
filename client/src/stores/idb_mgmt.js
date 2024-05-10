@@ -61,10 +61,18 @@ export class IdbConfig{
         return true
     }
 async createStoreInDb(dbName, dbVersion, storeName, storeKeyField){
+    //clear any previous db
+    await deleteDB(dbName, {
+      blocked() {
+        console.log(`error: can't delete ${dbName} because there are open connections`)
+      },
+    })
+    //create new db
     const dbPromise = await openDB(dbName, dbVersion, {
       upgrade (db) {
         if (!db.objectStoreNames.contains(storeName)) {
           db.createObjectStore(storeName, { keyPath: storeKeyField });
+          console.log(`database created: ${storeName}`)
         }
       }
     })

@@ -84,6 +84,10 @@ export default{
 .block{
     white-space: pre-wrap;
     font-family: Arial, Helvetica, sans-serif;
+
+    /*same as Table.vue > .snippet_container*/
+    height: 90vh;
+    overflow-y: auto;
 }
 
 </style>

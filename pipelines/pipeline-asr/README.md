@@ -124,6 +124,7 @@ py.test tests/test_utils.py  -k 'test_export_to_output_excel_single_file' -s
   - ~~fix duplicates~~ => empty sound
   - ~~fix empties~~
 * output: workspace
+  - name: v0.2.1_YYYYMMDD_0-100.gz
   - incorrect image (follow from client)
 * design
   - oop design
